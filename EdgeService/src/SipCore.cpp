@@ -10,6 +10,8 @@ m_endpt(NULL) {
 
 SipCore::~SipCore() {
     pjsip_endpt_destory(m_endpt);
+    pj_caching_pool_destroy(&cachingPool);
+    pj_shutdown();
 }
 
 bool SipCore::initSip(int sipPort) {

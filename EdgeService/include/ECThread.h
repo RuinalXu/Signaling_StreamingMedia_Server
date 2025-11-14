@@ -5,7 +5,7 @@
 #include <string>
 #include <sys/prctl.h>
 
-namespace embedded_controller {
+namespace EC {
 
 typedef void* (*ECThreadFunc)(void*);
 

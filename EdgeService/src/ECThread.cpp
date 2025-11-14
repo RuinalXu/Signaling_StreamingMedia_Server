@@ -1,4 +1,4 @@
-#include "EC_thread.h"
+#include "ECThread.h"
 
 using namespace embedded_controller;
 

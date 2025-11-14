@@ -45,3 +45,5 @@ target_link_libraries(${EXE_NAME} PRIVATE
     libevent::pthreads
 )
 
+# -l lianjie 
+

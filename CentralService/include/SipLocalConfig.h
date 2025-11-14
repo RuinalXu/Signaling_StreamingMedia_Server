@@ -8,6 +8,9 @@
 #include <queue>
 
 
+/**
+ * 上级服务器配置
+ */
 class SipLocalConfig {
 public:
     SipLocalConfig();
