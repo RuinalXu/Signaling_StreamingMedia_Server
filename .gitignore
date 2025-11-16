@@ -7,6 +7,9 @@ NOTE.md
 build
 /build/
 
+third_party
+/third_party/
+
 logs
 /logs/
 
@@ -16,10 +19,8 @@ ports-overlay
 .vscode
 /.vscode/
 
-/CentralService/build
-/CentralService/.vscode
-/CentralService/CMakeUserPresets
 
-/EdgeService/build
+/CentralService/.vscode
+
+
 /EdgeService/.vscode
-/EdgeService/CMakeUserPresets

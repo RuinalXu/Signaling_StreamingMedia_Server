@@ -1,4 +1,4 @@
-#include "thread_pool.h"
+#include "ThreadPool.h"
 
 // pthread_mutex_t ThreadPool::m_queueLock = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t ThreadPool::m_queueLock;

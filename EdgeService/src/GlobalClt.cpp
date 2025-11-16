@@ -1,15 +1,15 @@
-#include "GlobalController.h"
+#include "GlobalCtl.h"
 
-GlobalController* GlobalController::m_pInstance = NULL;
+GlobalCtl* GlobalCtl::m_pInstance = NULL;
 
-GlobalController* GlobalController::instance() {
+GlobalCtl* GlobalCtl::instance() {
     if (!m_pInstance) {
-        m_pInstance = new GlobalController();
+        m_pInstance = new GlobalCtl();
     }
     return m_pInstance;
 }
 
-bool GlobalController::init(void* param) {
+bool GlobalCtl::init(void* param) {
     gConfig = (SipLocalConfig*) param;
     if (!gConfig) {
         return false;
