@@ -4,8 +4,10 @@ cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # 设置编译后的可执行名称并指定变量名
-set(EXE_NAME SipSupService)
+set(EXE_NAME CentralService)
 
 # 指定需要编译的源文件路径，并指定相应的变量名
 aux_source_directory(./src SRC)
@@ -45,25 +47,21 @@ find_library(PJLIB_UTIL_LIB pjlib-util-aarch64-unknown-linux-gnu PATHS ${PJPROJE
 
 
 find_package(fmt CONFIG REQUIRED)
-# find_package(glog CONFIG REQUIRED)
-# find_package(gflags CONFIG REQUIRED)
-# find_package(jsoncpp CONFIG REQUIRED)
-# find_package(tinyxml2 CONFIG REQUIRED)
-# find_package(Libevent CONFIG REQUIRED)
+find_package(glog CONFIG REQUIRED)
+find_package(gflags CONFIG REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
+find_package(tinyxml2 CONFIG REQUIRED)
+find_package(Libevent CONFIG REQUIRED)
 
 target_link_libraries(${EXE_NAME} PRIVATE
     fmt::fmt
+    glog::glog
+    gflags::gflags
+    tinyxml2::tinyxml2
+    JsonCpp::JsonCpp
+    libevent::extra
+    libevent::pthreads
 )
-
-# target_link_libraries(${EXE_NAME} PRIVATE
-#     fmt::fmt
-#     glog::glog
-#     gflags::gflags
-#     tinyxml2::tinyxml2
-#     JsonCpp::JsonCpp
-#     libevent::extra
-#     libevent::pthreads
-# )
 
 target_link_libraries(${EXE_NAME} PRIVATE
     ${PJLIB_LIB}

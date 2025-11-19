@@ -16,5 +16,5 @@ fi
 # 使用预设的配置构建项目
 cmake --preset user_preset
 
-# 编译得到可执行文件
-cmake --build ./build
+
+

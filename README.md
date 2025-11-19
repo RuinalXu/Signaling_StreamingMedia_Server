@@ -1,15 +1,31 @@
-# 教学视频中GB28181开发
+# 基于GB28181的信令流媒体服务器
 
-最终实现目的：按照GB28181手册，从零开发并完成上下级信令服务器和媒体服务器；
+最终实现目的：按照GB28181手册，从零开发并完成上下级信令服务器和媒体服务器，二者都是**服务端**；
+
+---
 
 ## 开发环境：
-windows：VSCode + CMake + wireshark（抓包）
-Linux：CMake编译 + tcpdump（抓包）
+- Ubuntu Server 22.4
+- CMake项目构建 + vcpkg管理部分第三方库 + tcpdump（抓包）
+- wireshark（分析Linux所抓包信息）
+
+## 所用到的第三方库
+vcpkg精选注册表端口：
+1. jsoncpp：处理json文件的库；
+2. timyxml2：处理XML文档的库；
+3. glog：Google风格的日志库;
+4. gflags：命令行参数/标志（flags）解析库；
+5. libevent：高性能、跨平台的事件驱动网络库；
+
+非精选注册表端口：
+1. pjproject: https://github.com/pjsip/pjproject
+    - pjsip：
+2. jrtplib：
+3. jthread：
 
 # 项目的架构
-整个项目分为上下级开发，上级服务（CentralService）和下级服务（EdgeService）；CentralService中实现上级信令服务、上级流媒体服务，EdgeService中实实现下级信令服务、下级流媒体服务。
 
-CMake统一构建入口：
+整个服务端项目分为上下级开发，上级服务（CentralService）和下级服务（EdgeService）；CentralService中实现信令管理、上级流媒体服务，EdgeService中实实现下级信令服务、下级流媒体服务。
 
 ## 核心概念与技术
 1. GB28181：中国联网监控系统的标准协议，其定义了监控设备之间的通信规范（包括设备注册，设备控制，实时流媒体传输等内容）；
@@ -24,27 +40,9 @@ CMake统一构建入口：
     - 抓包处理TCP异常；
 7. RTP/PS/h.264数据包，也是三个协议
 
-为了提高读写事物的效率
+为了提高读写事务的效率
 
 RTP/TRSP/RTMP
 
 后续集成GB35114
 
-## 此项目开发环境
-VSCode + cmake + vcpkg
-
-## 所用到的第三方库
-vcpkg精选注册表端口：
-1. jsoncpp：处理json文件的库；
-2. timyxml2：处理XML文档的库；
-3. glog：Google风格的日志库;
-4. gflags：命令行参数/标志（flags）解析库；
-5. libevent：高性能、跨平台的事件驱动网络库；
-
-非精选注册表端口：
-1. pjsip：
-    - pjproject: https://github.com/pjsip/pjproject
-2. jrtplib：非精选注册表端口；
-3. jthread：
-
-如何配置，如何使用
