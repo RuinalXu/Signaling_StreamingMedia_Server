@@ -1,18 +1,7 @@
 #include <fmt/base.h>
-
-// #include "common.h"
 #include "LogManager.h"
-// #include "SipLocalConfig.h"
-// #include "GlobalCtl.h"
-// #include "EC_thread.h"
+#include "SipLocalConfig.h"
 
-// using namespace embedded_controller;
-
-
-// void* func(void* argc) {
-//     pthread_t id = pthread_self();
-//     LOG(INFO) << "current thread id:" << id;
-// }
 
 int main(int argc, char ** argv) {
     GlogInitializer glogInit(0);
@@ -20,7 +9,10 @@ int main(int argc, char ** argv) {
     // 忽略control+c的信号
     signal(SIGINT, SIG_IGN);
 
-    LOG();
+    SipLocalConfig* config = new SipLocalConfig();
+    int ret = config->ReadConf();
+    
+
     
     return 0;
 }
