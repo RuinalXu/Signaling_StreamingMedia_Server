@@ -17,8 +17,8 @@ add_executable(${EXE_NAME} ${SRC})
 set(PJPROJECT_PJLIB_ROOT "../third_party/pjproject/pjlib")
 set(PJPROJECT_PJSIP_ROOT "../third_party/pjproject/pjsip")
 set(PJPROJECT_PJLIB_UTIL_ROOT "../third_party/pjproject/pjlib-util")
-# set(PJPROJECT_PJNATH_ROOT "../third_party/pjproject/pjnath")
-# set(PJPROJECT_PJMEDIA_ROOT "../third_party/pjproject/pjmedia")
+set(PJPROJECT_PJMEDIA_ROOT "../third_party/pjproject/pjmedia")
+set(PJPROJECT_PJNATH_ROOT "../third_party/pjproject/pjnath")
 
 
 # 添加项目头文件以及第三方库头文件
@@ -26,8 +26,11 @@ target_include_directories(${EXE_NAME} PRIVATE ./include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJLIB_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJSIP_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJLIB_UTIL_ROOT}/include)
-# target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJNATH_ROOT}/include)
-# target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJMEDIA_ROOT}/include)
+target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJMEDIA_ROOT}/include)
+target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJNATH_ROOT}/include)
+
+# 编辑时定义宏
+target_compile_definitions(${EXE_NAME} PRIVATE PJ_HAS_CONFIG_SITE=1)
 
 # 判断当前使用的操作系统
 message(STATUS "Operation System is ${CMAKE_SYSTEM}")
@@ -42,9 +45,8 @@ add_definitions(-g)
 find_library(PJLIB_LIB pj-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJLIB_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(PJSIP_LIB pjsip-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(PJLIB_UTIL_LIB pjlib-util-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJLIB_UTIL_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-# find_library(PJNATH_LIB pjnath-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJNATH_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-# find_library(PJMEDIA_LIB pjmedia-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-
+find_library(PJMEDIA_LIB pjmedia-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJNATH_LIB pjnath-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJNATH_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(glog CONFIG REQUIRED)
@@ -67,5 +69,7 @@ target_link_libraries(${EXE_NAME} PRIVATE
     ${PJLIB_LIB}
     ${PJSIP_LIB}
     ${PJLIB_UTIL_LIB}
+    ${PJMEDIA_LIB}
+    ${PJNATH_LIB}
 )
 
