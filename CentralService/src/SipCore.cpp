@@ -3,9 +3,7 @@
 #include "GlobalCtl.h"
 
 SipCore::SipCore()
-:m_endpt(NULL) {
-
-}
+:m_endpt(NULL) {}
 
 SipCore::~SipCore() {
     pjsip_endpt_destroy(m_endpt);

@@ -1,6 +1,6 @@
 #include "SipLocalConfig.h"
 
-#define CONFIGFILE_PATH "../../config/CentralService.conf"
+#define CONFIGFILE_PATH "../../config/EdgeService.conf"
 #define LOCAL_SECTION "localserver"
 #define SIP_SECTION "sipserver"
 
@@ -9,18 +9,19 @@ static const string keyLocalPort = "local_port";
 static const string keySipId = "sip_id";
 static const string keySipIp = "sip_ip";
 static const string keySipPort = "sip_port";
-static const string keySipRealm = "sip_realm";
-static const string keySipUsr = "sip_usr";
-static const string keySipPwd = "sip_pwd";
 static const std::string keyRtpPortBegin   = "rtp_port_begin";
 static const std::string keyRtpPortEnd   = "rtp_port_end";
 
-static const string keySubNodeNum = "subnode_num";
-static const string keySubNodeId = "sip_subnode_id";
-static const string keySubNodeIp = "sip_subnode_ip";
-static const string keySubNodePort = "sip_subnode_port";
-static const string keySubNodePoto = "sip_subnode_poto";
-static const string keySubNodeAuth = "sip_subnode_auth";
+static const string keySupNodeNum = "supnode_num";
+static const string keySupNodeId = "sip_supnode_id";
+static const string keySupNodeIp = "sip_supnode_ip";
+static const string keySupNodePort = "sip_supnode_port";
+static const string keySupNodePoto = "sip_supnode_poto";
+static const string keySupNodeAuth = "sip_supnode_auth";
+static const string keySupNodeExpires = "sip_supnode_expires";
+static const string keySupNodeUsr = "sip_supnode_usr";
+static const string keySupNodePwd = "sip_supnode_pwd";
+static const string keySupNodeRealm = "sip_supnode_realm";
 
 SipLocalConfig::SipLocalConfig()
 :m_conf(CONFIGFILE_PATH) {
@@ -29,11 +30,10 @@ SipLocalConfig::SipLocalConfig()
     m_sipId = "";
     m_sipIp = "";
     m_sipPort = 0;
-    m_sipRealm = "";
-    m_subNodeIp = "";
-    m_subNodePort = 0;
-    m_subNodePoto = 0;
-    m_subNodeAuth = 0;
+    m_supNodeIp = "";
+    m_supNodePort = 0;
+    m_supNodePoto = 0;
+    m_supNodeAuth = 0;
 }
 
 SipLocalConfig::~SipLocalConfig(){
@@ -82,31 +82,38 @@ int SipLocalConfig::ReadConf(){
         return ret;
     }
 
-    m_sipRealm = m_conf.readStr(keySipRealm);
-    if(m_sipRealm.empty())
-    {
-        ret = -1;
-        LOG(ERROR)<<"sipRealm is wrong";
-        return ret;
-    }
-
-    m_usr = m_conf.readStr(keySipUsr);
-    if(m_usr.empty())
-    {
-        ret = -1;
-        LOG(ERROR)<<"usr is wrong";
-        return ret;
-    }
-
-    m_pwd = m_conf.readStr(keySipPwd);
-    if(m_pwd.empty())
-    {
-        ret = -1;
-        LOG(ERROR)<<"pwd is wrong";
-        return ret;
-    }
     LOG(INFO)<<"localip:"<<m_localIp<<",localport:"<<m_localPort<<",sipid:"<<m_sipId<<",sipip:"<<m_sipIp\
-    <<",sipport:"<<m_sipPort<<",sipRealm"<<m_sipRealm;
+    <<",sipport:"<<m_sipPort;
+
+    int num = m_conf.readInt(keySupNodeNum);
+    LOG(INFO) << "num:" << num;
+
+    SupNodeInfo info;
+    for(int i = 1;i<num+1;++i)
+    {
+        string id = keySupNodeId + to_string(i);
+        string ip = keySupNodeIp + to_string(i);
+        string port = keySupNodePort + to_string(i);
+        string poto = keySupNodePoto + to_string(i);
+        string auth = keySupNodeAuth + to_string(i);
+        string expires = keySupNodeExpires + to_string(i);
+        string usr = keySupNodeUsr+to_string(i);
+        string pwd = keySupNodePwd+to_string(i);
+        string realm = keySupNodeRealm + to_string(i);
+
+        info.id = m_conf.readStr(id);
+        info.ip = m_conf.readStr(ip);
+        info.port = m_conf.readInt(port);
+        info.poto = m_conf.readInt(poto);
+        LOG(INFO)<<"info.poto:"<<info.poto;
+        info.expires = m_conf.readInt(expires);
+        info.usr = m_conf.readStr(usr);
+        info.pwd = m_conf.readStr(pwd);
+        info.auth = m_conf.readInt(auth);
+        info.realm = m_conf.readStr(realm);
+        supNodeInfoList.push_back(info);
+    }
+    LOG(INFO)<<"supNodeInfoList.SIZE:"<<supNodeInfoList.size();
 	
 	// m_rtpPortBegin = m_conf.readInt(keyRtpPortBegin);
     // if(m_rtpPortBegin<=0)
@@ -125,27 +132,6 @@ int SipLocalConfig::ReadConf(){
     // }
 	// initRandPort();
 	
-    // int num = m_conf.readInt(keySubNodeNum);
-    // LOG(INFO)<<"num:"<<num;
-    // SubNodeInfo info;
-    // for(int i = 1;i<num+1;++i)
-    // {
-    //     string id = keySubNodeId + to_string(i);
-    //     string ip = keySubNodeIp + to_string(i);
-    //     string port = keySubNodePort + to_string(i);
-    //     string poto = keySubNodePoto + to_string(i);
-    //     string auth = keySubNodeAuth + to_string(i);
-
-    //     info.id = m_conf.readStr(id);
-    //     info.ip = m_conf.readStr(ip);
-    //     info.port = m_conf.readInt(port);
-    //     info.poto = m_conf.readInt(poto);
-    //     info.auth = m_conf.readInt(auth);
-    //     ubNodeInfoList.push_back(info);
-    // }
-    // LOG(INFO)<<"ubNodeInfoList.SIZE:"<<ubNodeInfoList.size();
-
-
     return ret;
 }
 

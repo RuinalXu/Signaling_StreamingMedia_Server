@@ -40,21 +40,19 @@ SipLocalConfig::~SipLocalConfig(){
 
 }
 
-int SipLocalConfig::ReadConf(){
+int SipLocalConfig::ReadConf() {
     int ret = 0;
     m_conf.setSection(LOCAL_SECTION);
     m_localIp = m_conf.readStr(keyLocalIp);
-    if(m_localIp.empty())
-    {
+    if (m_localIp.empty()) {
         ret = -1;
-        LOG(ERROR)<<"localIp is wrong";
+        LOG(ERROR) << "localIp is wrong";
         return ret;
     }
     m_localPort = m_conf.readInt(keyLocalPort);
-    if(m_localPort <= 0)
-    {
+    if(m_localPort <= 0) {
         ret = -1;
-        LOG(ERROR)<<"localPort is wrong";
+        LOG(ERROR) << "localPort is wrong";
         return ret;
     }
 
@@ -107,6 +105,26 @@ int SipLocalConfig::ReadConf(){
     }
     LOG(INFO)<<"localip:"<<m_localIp<<",localport:"<<m_localPort<<",sipid:"<<m_sipId<<",sipip:"<<m_sipIp\
     <<",sipport:"<<m_sipPort<<",sipRealm"<<m_sipRealm;
+
+    int num = m_conf.readInt(keySubNodeNum);
+    LOG(INFO)<<"num:"<<num;
+    SubNodeInfo info;
+    for(int i = 1;i<num+1;++i)
+    {
+        string id = keySubNodeId + to_string(i);
+        string ip = keySubNodeIp + to_string(i);
+        string port = keySubNodePort + to_string(i);
+        string poto = keySubNodePoto + to_string(i);
+        string auth = keySubNodeAuth + to_string(i);
+
+        info.id = m_conf.readStr(id);
+        info.ip = m_conf.readStr(ip);
+        info.port = m_conf.readInt(port);
+        info.poto = m_conf.readInt(poto);
+        info.auth = m_conf.readInt(auth);
+        subNodeInfoList.push_back(info);
+    }
+    LOG(INFO)<<"subNodeInfoList.SIZE:" << subNodeInfoList.size();
 	
 	// m_rtpPortBegin = m_conf.readInt(keyRtpPortBegin);
     // if(m_rtpPortBegin<=0)
@@ -124,28 +142,7 @@ int SipLocalConfig::ReadConf(){
     //    return ret;
     // }
 	// initRandPort();
-	
-    // int num = m_conf.readInt(keySubNodeNum);
-    // LOG(INFO)<<"num:"<<num;
-    // SubNodeInfo info;
-    // for(int i = 1;i<num+1;++i)
-    // {
-    //     string id = keySubNodeId + to_string(i);
-    //     string ip = keySubNodeIp + to_string(i);
-    //     string port = keySubNodePort + to_string(i);
-    //     string poto = keySubNodePoto + to_string(i);
-    //     string auth = keySubNodeAuth + to_string(i);
-
-    //     info.id = m_conf.readStr(id);
-    //     info.ip = m_conf.readStr(ip);
-    //     info.port = m_conf.readInt(port);
-    //     info.poto = m_conf.readInt(poto);
-    //     info.auth = m_conf.readInt(auth);
-    //     ubNodeInfoList.push_back(info);
-    // }
-    // LOG(INFO)<<"ubNodeInfoList.SIZE:"<<ubNodeInfoList.size();
-
-
+    
     return ret;
 }
 

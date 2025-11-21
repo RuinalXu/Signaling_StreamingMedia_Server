@@ -54,3 +54,32 @@ endpoint
 
 # 视频目录请求和推送
 
+
+
+# SIP注册的一个代码逻辑
+    // 将封装SIP消息进行分装，转化为pjsip格式的字符串pj_str_t，通过pj_str()函数，
+    pj_str_t
+    pj_str();
+
+
+    // 定义SIP客户端注册的结构体变量；
+    pjsip_regc* regc;
+    // 初始化SIP客户端注册的结构体变量
+    pjsip_regc_create();
+
+    // pjsip_regc_cb()回调函数，是一个响应事件触发的一个接口
+
+    // 利用regc结构体来生成SIP注册请求的消息体
+    // 需要发送的数据的结构体定义
+    pjsip_tx_data* tdata = NULL;
+    // 再做封装
+    pjsip_regc_register();
+
+    // 发送请求注册消息
+    pjsip_regc_send();
+
+    // pjsip_regc_send()函数中调用了以下函数，该函数中regc_tsx_callback的回调函数需要重点关注，该回调函数在消息发送成功是才会触发回调，
+    status = pjsip_endpt_send_request(regc->endpt, tdata, REGC_TSX_TIMEOUT,
+                                      regc, &regc_tsx_callback);
+                                      
+    // 如果已经注册成功，需要在regc_tsx_callback指向的回调函数中设置下级结构体的注册状态

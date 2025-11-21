@@ -46,6 +46,8 @@ int ThreadPool::createThreadPool(int threadCount) {
         }
         LOG(INFO) << "thread:" << pid << " was created";
     }
+    // 未定义返回值,导致发生未定义行为:[Trace/breakpoint trap (core dumped)]
+    return 0;
 }
 
 int ThreadPool::waitTask() {

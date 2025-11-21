@@ -14,17 +14,39 @@
 
 
 class GlobalCtl;
-#define GBOJ(obj) GlobalCtl::instance->obj
+#define GBOJ(obj) GlobalCtl::instance()->obj
 
 
 class GlobalCtl {
-private:
-    static GlobalCtl* m_pInstance;
-private:
-    GlobalCtl(){}
-    ~GlobalCtl(){}
-    GlobalCtl(const GlobalCtl& global);
-    const GlobalCtl& operator=(const GlobalCtl& global);
+public:
+    typedef struct _SupDomainInfo {
+        _SupDomainInfo() {
+            sipId = "";
+            addrIp = "";
+            sipPort = 0;
+            protocal = 0;
+            registered = 0;
+            expires = 0;
+            usr = "";
+            pwd = "";
+            isAuth = false;
+            realm = "";
+        }
+        string sipId;
+        string addrIp;
+        int sipPort;
+        int protocal;
+        int registered;
+        int expires;
+        bool isAuth;
+        string usr;
+        string pwd; 
+        string realm;
+    } SupDomainInfo;
+    typedef list<SupDomainInfo> SUPDOMAININFOLIST;
+    SUPDOMAININFOLIST& getSupDomainInfoList() {
+        return supDomainInfoList;
+    }
 public:
     static bool gStopPool;
     SipLocalConfig* gConfig = NULL;
@@ -33,7 +55,14 @@ public:
 public:
     static GlobalCtl* instance();
     bool init(void* param);
-
+private:
+    static GlobalCtl* m_pInstance;
+    static SUPDOMAININFOLIST supDomainInfoList;
+private:
+    GlobalCtl(){}
+    ~GlobalCtl(){}
+    GlobalCtl(const GlobalCtl& global);
+    const GlobalCtl& operator=(const GlobalCtl& global);
 };
 
 #endif

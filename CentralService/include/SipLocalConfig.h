@@ -52,6 +52,6 @@ public:
         int poto;
         int auth;
     };
-    list<SubNodeInfo> ubNodeInfoList;
+    list<SubNodeInfo> subNodeInfoList;
 };
 #endif

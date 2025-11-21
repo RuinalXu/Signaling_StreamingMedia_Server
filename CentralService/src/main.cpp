@@ -1,6 +1,7 @@
 #include <fmt/base.h>
 #include "LogManager.h"
 #include "SipLocalConfig.h"
+#include "GlobalCtl.h"
 
 
 int main(int argc, char* argv[]) {
@@ -11,7 +12,21 @@ int main(int argc, char* argv[]) {
 
     SipLocalConfig* config = new SipLocalConfig();
     int ret = config->ReadConf();
-    fmt::println("ret = {}", ret);
+	if (ret == -1) {
+		LOG(ERROR) << "read config error";
+		return ret;
+	}
+
+	bool re = GlobalCtl::instance()->init(config);
+	if (re == false) {
+		LOG(ERROR) << "init error";
+		return -1;
+	}
+
+	while(true)
+	{
+		sleep(30);
+	}
 
     
     return 0;
