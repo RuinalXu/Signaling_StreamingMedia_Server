@@ -29,8 +29,8 @@ target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJLIB_UTIL_ROOT}/incl
 target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJMEDIA_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJPROJECT_PJNATH_ROOT}/include)
 
-# 编辑时定义宏
-target_compile_definitions(${EXE_NAME} PRIVATE PJ_HAS_CONFIG_SITE=1)
+# 编辑时定义宏,指定字节序
+target_compile_definitions(${EXE_NAME} PRIVATE PJ_IS_LITTLE_ENDIAN=1)
 
 # 判断当前使用的操作系统
 message(STATUS "Operation System is ${CMAKE_SYSTEM}")
@@ -66,10 +66,10 @@ target_link_libraries(${EXE_NAME} PRIVATE
 )
 
 target_link_libraries(${EXE_NAME} PRIVATE
-    ${PJLIB_LIB}
     ${PJSIP_LIB}
-    ${PJLIB_UTIL_LIB}
     ${PJMEDIA_LIB}
     ${PJNATH_LIB}
+    ${PJLIB_UTIL_LIB}
+    ${PJLIB_LIB}
 )
 
