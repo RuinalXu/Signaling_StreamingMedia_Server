@@ -12,6 +12,9 @@ GlobalCtl* GlobalCtl::instance() {
     return m_pInstance;
 }
 
+/**
+ *  初始化函数,配置信息,endpoint对象
+ */
 bool GlobalCtl::init(void* param) {
     gConfig = (SipLocalConfig*)param;
     if (!gConfig) {
@@ -41,8 +44,7 @@ bool GlobalCtl::init(void* param) {
         gThPool = new ThreadPool();
         gThPool->createThreadPool(10);
     }
-
-    LOG(ERROR) << "222";
+    
     if (!gSipServer) {
         gSipServer = new SipCore();
     }

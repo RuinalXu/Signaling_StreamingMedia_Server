@@ -2,13 +2,15 @@
 #include "Common.h"
 #include "SipMessage.h"
 
-
 SipRegister::SipRegister() {
-
+    m_regTimer = new TaskTimer(3);
 }
 
 SipRegister::~SipRegister() {
-
+    if (m_regTimer) {
+        delete m_regTimer;
+        m_regTimer = NULL;
+    }
 }
 
 static void client_cb(struct pjsip_regc_cbparam *param) {
@@ -18,6 +20,31 @@ static void client_cb(struct pjsip_regc_cbparam *param) {
         subinfo->registered =true;
     }
     return;
+}
+
+/**
+ *  设置定时任务的入口函数指针和参数
+ */
+void SipRegister::RegisterProc(void* param){
+    SipRegister* pthis = (SipRegister*)param;
+    GlobalCtl::SUPDOMAININFOLIST::iterator iter = GlobalCtl::instance()->getSupDomainInfoList().begin();
+    for(;iter != GlobalCtl::instance()->getSupDomainInfoList().end(); iter++) {
+        if (!(iter->registered)) {
+            if (pthis->gbRegister(*iter)<0) {
+                LOG(ERROR) << "register error for:" << iter->sipId;
+            }
+        }
+    }
+}
+
+/**
+ *  对外提供的注册接口
+ */
+void SipRegister::registerServiceStart() {
+    if (m_regTimer) {
+        m_regTimer->setTimerFun(SipRegister::RegisterProc, (void*)this);
+        m_regTimer->start();
+    }
 }
 
 /**

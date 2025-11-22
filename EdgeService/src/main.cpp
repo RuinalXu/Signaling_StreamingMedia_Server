@@ -25,15 +25,11 @@ int main(int argc, char* argv[]) {
 		return ret;
 	}
 
-	LOG(ERROR) << "111111111111";
     bool re = GlobalCtl::instance()->init(config);
-	LOG(ERROR) << "22222222222";
 	if (re == false) {
-		LOG(ERROR) << "3333333";
 		LOG(ERROR) << "init error";
 		return -1;
 	}
-	LOG(ERROR) << "44444444";
 
     pthread_t pid;
 	ret = EC::ECThread::createThread(func, NULL, pid);
@@ -45,7 +41,14 @@ int main(int argc, char* argv[]) {
 	LOG(INFO) << "create thread pid:" <<pid;
 	LOG(INFO) << "main thread pid:" <<pthread_self();
 
+
+	LOG(ERROR) << "TEST 111";
+
+	// 启动定时注册服务
 	SipRegister* regc = new SipRegister();
+	regc->registerServiceStart();
+
+	LOG(ERROR) << "main1111";
     
 	while(true) {
 		sleep(30);

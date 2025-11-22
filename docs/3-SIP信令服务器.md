@@ -83,3 +83,9 @@ endpoint
                                       regc, &regc_tsx_callback);
                                       
     // 如果已经注册成功，需要在regc_tsx_callback指向的回调函数中设置下级结构体的注册状态
+
+## 下级在使用定时器开启定时器线程时，所创建的线程没有向pjlib注册，因此出现断言
+```shell
+EdgeService: ../src/pj/os_core_unix.c:857: pj_thread_this: Assertion `!"Calling pjlib from unknown/external thread. You must " "register external threads with pj_thread_register() " "before calling any pjlib functions."' failed.
+Aborted (core dumped)
+```

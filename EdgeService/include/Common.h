@@ -2,7 +2,7 @@
 #define COMMON_H
 
 #include <glog/logging.h>
-#include "tinyxml2.h"
+#include <tinyxml2.h>
 #include <json/json.h>
 #include <stdlib.h>
 #include <stdio.h>

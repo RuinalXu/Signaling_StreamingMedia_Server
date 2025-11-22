@@ -16,6 +16,16 @@
 class GlobalCtl;
 #define GBOJ(obj) GlobalCtl::instance()->obj
 
+/**
+ *  pjlib的线程注册
+ */
+static pj_status_t pjcall_thread_register(pj_thread_desc& desc) {
+    pj_thread_t* tread = 0;
+    if (!pj_thread_is_registered()) {
+        return pj_thread_register(NULL, desc, &tread);
+    }
+    return PJ_SUCCESS;
+}
 
 class GlobalCtl {
 public:
