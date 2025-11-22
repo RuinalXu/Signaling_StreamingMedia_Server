@@ -1,111 +1,161 @@
-#include "sip_core.h"
-#include "common.h"
-#include "sip_define.h"
+#include "SipCore.h"
+#include "SipDef.h"
+#include "GlobalCtl.h"
 
-
-SipCore::SipCore():
-m_endpt(NULL) {
+SipCore::SipCore()
+:m_endpt(NULL) {
 
 }
 
 SipCore::~SipCore() {
-    pjsip_endpt_destory(m_endpt);
-}
-
-bool SipCore::initSip(int sipPort) {
-    pj_status_t status;
-    // 0-关闭日志, 6-详细日志
-    pj_log_set_level(6);
-
-    // 调用pjsip接口进行相关库的初始化
-    do {
-        // 初始化pjlib库
-        status = pj_init();
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "init pjlib faild, code:" << status;
-            break;
-        }
-        
-        // 初始化pjlib-utils库
-        status = pjlib_util_init();
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "init pjlib util faild, code:" << status;
-            break;
-        }
-
-        // 初始化pjsip内存池,pjsip的核心endpoint对象需要由内存池工厂进行分配内存创建
-        pj_caching_pool cachingPool;
-        pj_caching_pool_init(&cachingPool, NULL, SIP_STACK_SIZE);
-
-        status = pjsip_endpt_create(&cachingPool.factoy, NULL, &m_endpt);
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "create endpt faild, code:" << status;
-            break;
-        }
-
-        // 初始化transcation对象
-        status = pjsip_tsx_layer_init_module(m_endpt);
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "init tsx layer faild, code:" << status;
-            break;
-        }
-
-        // 初始化dialog对象
-        status = pjsip_ua_init_module(e_endpt, NULL);
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "init UA layer faild, code:" << status;
-            break;
-        }
-
-        // 初始化transport对象
-        status = SipCore::initTransportLayer(sipPort);
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "init tansport layer faild, code:" << status;
-            break;
-        }
-
-    } while (0);
-
-    bool b_ret = true;
-    if (PJ_SUCESS != status) {
-        b_ret = false;
-    }
-
-    return b_ret;
+    pjsip_endpt_destroy(m_endpt);
+    pj_caching_pool_destroy(&m_cachingPool);
+    pj_shutdown();
+    GlobalCtl::gStopPoll = true;
 }
 
 /**
- * transport层就是负责将sip消息发送到网路并接收来在网络的sip消息；
- * pjsip的传输层是支持udp、tcp、tls
+ *  轮询线程入口回调函数
  */
-pj_status_t SipCore::initTransportLayer(int sipPort) {
-    // pjsip封装的表示IPV4的结构体
-    pjsockaddr_in addr;
-    pj_bzero(&addr, sizeof(addr));
-    // 指定协议族
-    addr.sin_family = pj_AF_INET();
-    // 地址,此处设置为本机
-    addr.sin_addr.s_addr = 0;
-    addr.sin_port = pj_htons((pj_uint_16_t)sipPort);
+static int pollingEvent(void* arg)
+{
+    LOG(INFO) << "poolling event thread start success";
+    pjsip_endpoint* ept = (pjsip_endpoint*)arg;
+    while(!(GlobalCtl::gStopPoll)) {
+        pj_time_val timeout = {0, 500};
+        pj_status_t status = pjsip_endpt_handle_events(ept, &timeout);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "polling events failed,code:" << status;
+            return -1;
+        }
+    }
+    return 0;
+}
 
+pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
+    return PJ_SUCCESS;
+}
+
+static pjsip_module recv_mod =
+{
+    NULL,NULL,
+    {"mod-recv",8},
+    -1,
+    PJSIP_MOD_PRIORITY_APPLICATION,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    onRxRequest,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
+
+bool SipCore::InitSip(int sipPort) {
     pj_status_t status;
+    
+    // 0-关闭; 6-最详细
+    pj_log_set_level(0);
 
-    // 调用transport的接口来启动UDP和TCP服务
     do {
-        status = pjsip_udp_transport_start(m_endpt, &daar, NULL, 1, NULL);
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "start udp server faild, code:" << status;
+        // 初始化pjlib
+        status = pj_init();
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "init pjlib faild,code:" << status;
             break;
         }
 
-        status = pjsip_tcp_transport_start(m_endpt, &daar, NULL, 1, NULL);
-        if (PJ_SUCESS != status) {
-            LOG(ERROR) << "start tcp server faild, code:" << status;
+        // 初始化pjlib-util库
+        status = pjlib_util_init();
+        if(PJ_SUCCESS != status) {
+            LOG(ERROR) << "init pjlib util faild,code:" << status;
             break;
         }
 
+        // 初始化endpoint, 该对象需要有pjsip内存工厂分配创建
+        // 初始化pjsip重要模块: endpoint, transcation, dialog, transport
+        // 一个pjsip进程只有一个endpoint对象,其他三个模块都有由endpoint进行管理的.
+        pj_caching_pool_init(&m_cachingPool, NULL, SIP_STACK_SIZE);
+        status = pjsip_endpt_create(&m_cachingPool.factory, NULL, &m_endpt);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "create endpt faild,code:" << status;
+            break;
+        }
+
+        // 初始化事务层
+        status = pjsip_tsx_layer_init_module(m_endpt);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "init tsx layer faild,code:" << status;
+            break;
+        }
+
+        // 初始化会话层
+        status = pjsip_ua_init_module(m_endpt, NULL);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "init UA layer faild,code:" <<status;
+            break;
+        }
+
+        // 初始化传输层,同时初始化TCP与UDP
+        status = init_transport_layer(sipPort);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "init transport layer faild,code:" << status;
+            break;
+        }
+
+        // 自定模块注册到endpoint中
+        pjsip_endpt_register_module(m_endpt, &recv_mod);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "register recv_mod faild,code:" << status;
+            break;
+        }
+
+        // 给endpoint分配内存池后,endpoint才能对其他模块进行内存分配管理
+        m_pool = pjsip_endpt_create_pool(m_endpt, NULL, SIP_ALLOC_POOL_1M, SIP_ALLOC_POOL_1M);
+        if (NULL == m_pool) {
+            LOG(ERROR)<<"create pool faild";
+            break;
+        }
+        // 创建线程轮询处理endpoint事务
+        pj_thread_t* eventThread = NULL;
+        status = pj_thread_create(m_pool, NULL, &pollingEvent, m_endpt, 0, 0, &eventThread);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "create pjsip thread faild,code:" << status;
+            break;
+        }
+    } while(0);
+
+    bool bret = true;
+    if (PJ_SUCCESS != status) {
+        bret = false;
+    }
+    return bret;
+}
+
+/**
+ *  初始化传输层
+ */
+pj_status_t SipCore::init_transport_layer(int sipPort) {
+    pj_sockaddr_in addr;
+    pj_bzero(&addr, sizeof(addr));
+    addr.sin_family = pj_AF_INET();
+    addr.sin_addr.s_addr = 0;
+    addr.sin_port = pj_htons((pj_uint16_t)sipPort);
+    pj_status_t status;
+    do {
+        status = pjsip_udp_transport_start(m_endpt, &addr, NULL, 1, NULL);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "start udp server faild,code:" << status;
+            break;
+        }
+        status = pjsip_tcp_transport_start(m_endpt, &addr, 1, NULL);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "start tcp server faild,code:" << status;
+            break;
+        }
         LOG(INFO) << "sip tcp:" << sipPort << " udp:" << sipPort << " running";
-    } while (0)
-
+    } while (0);
     return status;
 }

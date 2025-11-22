@@ -1,16 +1,18 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <cstring>
-
 #include <glog/logging.h>
 #include <tinyxml2.h>
 #include <json/json.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
+#include <unistd.h>
+#include <semaphore.h>
+#include <memory>
+#include <sstream>
 
-#include "ThreadPool.h"
+using namespace std;
 
 /**
  * 智能锁,使用系统调用中定义的互斥锁锁,获取到锁后可能出现未释放锁的情况;
@@ -19,18 +21,37 @@
  * 
  * 用有参构造初始化对象
  */
-class AutoMutexLock{
+class AutoMutexLock {
+public:
+    AutoMutexLock(pthread_mutex_t* l): lock(l) {
+        LOG(INFO) << "get lock";
+        getLock();
+    }
+
+    ~AutoMutexLock() {
+        LOG(INFO) << "free lock";
+        freeLock();
+    }
+private:
+    pthread_mutex_t* lock;
 private:
     AutoMutexLock();
     AutoMutexLock(const AutoMutexLock&);
     AutoMutexLock& operator=(const AutoMutexLock&);
+    
+    /**
+     * 获取锁
+     */
+    void getLock(){ 
+        pthread_mutex_lock(lock);
+    }
 
-    pthread_mutex_t* lock;
-public:
-    AutoMutexLock(pthread_mutex_t* l): lock(l){ getLock(); };
-    ~AutoMutexLock(){ freeLock(); }
-    void getLock(){ pthread_mutex_lock(lock); }
-    void freeLock(){ pthread_mutex_unlock(lock); }
+    /**
+     * 释放锁
+     */
+    void freeLock() {
+        pthread_mutex_unlock(lock);
+    }
 };
 
 #endif

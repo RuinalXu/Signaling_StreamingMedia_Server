@@ -1,31 +1,22 @@
 #ifndef SIP_REGISTER_H
 #define SIP_REGISTER_H
 
+#include "GlobalCtl.h"
+#include "TaskTimer.h"
 
-/**
- * 下级注册请求
- */
-class SipRegister
-{
+class SipRegister {
 private:
-    TaskTimer m_regTimer;
-public:
-    SipRegister(/* args */);
-    ~SipRegister();
-    
     /**
-     * 发送注册请求
+     *  定时任务指针
      */
-    int gbRegister();
+    TaskTimer* m_regTimer;
+public:
+    SipRegister();
+    ~SipRegister();
+
+    void registerServiceStart();
+    int gbRegister(GlobalCtl::SupDomainInfo& node);
+    static void RegisterProc(void* param);
 };
-
-SipRegister::SipRegister(/* args */)
-{
-}
-
-SipRegister::~SipRegister()
-{
-}
-
 
 #endif

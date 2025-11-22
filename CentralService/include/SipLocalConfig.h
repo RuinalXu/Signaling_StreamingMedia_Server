@@ -1,39 +1,56 @@
 #ifndef SIP_LOCAL_CONFIG_H
 #define SIP_LOCAL_CONFIG_H
 
-#include "config_reader.h"
-#include "common.h"
+#include "ConfReader.h"
+#include "Common.h"
 #include <list>
 #include <algorithm>
 #include <queue>
 
-
-/**
- * 上级服务器配置
- */
 class SipLocalConfig {
-public:
-    SipLocalConfig();
-    ~SipLocalConfig();
-    int readConfig();
-    
-    inline std::string localIp() const { return m_localIp; }
-    inline int localPort() const { return m_localPort; }
-    inline std::string sipIp() const { return m_sipIp; }
-    inline int sipPort() const { return m_sipPort; }
 private:
-    ConfigReader m_conf;
-
-    std::string m_localIp;
+    ConfReader m_conf;
+    string m_localIp;
     int m_localPort;
-    std::string m_sipIp;
+    string m_sipId;
+    string m_sipIp;
     int m_sipPort;
-
-    std::string m_subNodeIp;
+    string m_usr;
+    string m_pwd;
+    string m_sipRealm;
+    string m_subNodeIp;
     int m_subNodePort;
     int m_subNodePoto;
     int m_subNodeAuth;
+    int m_rtpPortBegin;
+    int m_rtpPortEnd;
+    std::queue<int> m_RandNum;
+    pthread_mutex_t m_rtpPortLock;
+public:
+    SipLocalConfig();
+    ~SipLocalConfig();
+
+    int ReadConf();
+    void initRandPort();
+    int popOneRandNum();
+    int pushOneRandNum(int num);
+    
+    inline string localIp(){return m_localIp;}
+    inline int localPort(){return m_localPort;}
+    inline int sipPort(){return m_sipPort;}
+    inline string sipId(){return m_sipId;}
+    inline string sipIp(){return m_sipIp;}
+    inline string realm(){return m_sipRealm;}
+    inline string usr(){return m_usr;}
+    inline string pwd(){return m_pwd;}
+    
+    struct SubNodeInfo {
+        string id;
+        string ip;
+        int port;
+        int poto;
+        int auth;
+    };
+    list<SubNodeInfo> subNodeInfoList;
 };
-
-
 #endif

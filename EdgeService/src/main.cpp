@@ -1,55 +1,52 @@
 #include <fmt/base.h>
-
-#include "common.h"
-#include "log_manager.h"
+#include "LogManager.h"
 #include "SipLocalConfig.h"
-#include "global_controller.h"
-#include "EC_thread.h"
-
-using namespace embedded_controller;
+#include "GlobalCtl.h"
+#include "SipRegister.h"
 
 
 void* func(void* argc) {
-    pthread_t id = pthread_self();
-    LOG(INFO) << "current thread id:" << id;
+	pthread_t id = pthread_self();
+	LOG(INFO) << "current thread id:"<<id;
+	return NULL;
 }
 
-int main(int argc, char ** argv) {
-    fmt::print("Hello SipSupService\n");
+int main(int argc, char* argv[]) {
+    GlogInitializer glogInit(0);
 
     // 忽略control+c的信号
     signal(SIGINT, SIG_IGN);
-    
-    loger::GlogInitializer glogInit(0);
-    
+
+	
     SipLocalConfig* config = new SipLocalConfig();
-    int ret = config -> readConfig();
+    int ret = config->ReadConf();
     if (ret == -1) {
-        LOG(ERROR) << "read config error";
-        return ret;
-    }
-    bool re = GlobalController::instance() -> init(config);
-    if (re == false) {
-        LOG(ERROR) << "init error";
-        return -1;
-    }
-    LOG(INFO) << GBOJ(g_config) -> localIp();
+		LOG(ERROR) << "read config error";
+		return ret;
+	}
 
-    // 使用EC_thread.cpp
+    bool re = GlobalCtl::instance()->init(config);
+	if (re == false) {
+		LOG(ERROR) << "init error";
+		return -1;
+	}
+
     pthread_t pid;
-    embedded_controller::ECThread::createThread(func, NULL, pid);
-    if (ret != 0) {
-        ret = -1;
-        LOG(ERROR) << "create thread error";
-        return ret;
-    }
-    LOG(INFO) << "create thread pid:" << pid;
-    LOG(INFO) << "main thread pid:" << pthread_self();
+	ret = EC::ECThread::createThread(func, NULL, pid);
+	if (ret != 0) {
+		ret = -1;
+		LOG(ERROR)<<"create thread error";
+		return ret;
+	}
+	LOG(INFO) << "create thread pid:" <<pid;
+	LOG(INFO) << "main thread pid:" <<pthread_self();
 
-    while (true)
-    {
-        std::this_thread::sleep_for(std::chrono::seconds(30));
-    }
-    
+	// 启动定时注册服务
+	SipRegister* regc = new SipRegister();
+	regc->registerServiceStart();
+
+	while(true) {
+		sleep(30);
+	}
     return 0;
 }

@@ -1,12 +1,13 @@
 #ifndef THREAD_POOL_H
 #define THREAD_POOL_H
 
+#include "Common.h"
+#include "ECThread.h"
 #include <queue>
 #include <unistd.h>
 #include <semaphore.h>
 
-#include "common.h"
-#include "EC_thread.h"
+using namespace EC;
 
 class ThreadTask {
 public:
@@ -15,26 +16,22 @@ public:
     virtual void run() = 0;
 };
 
-/**
- * 定义线程池
- */
 class ThreadPool {
 private:
     sem_t m_signalSem;
 public:
+    static queue<ThreadTask*> m_taskQueue;
+    static pthread_mutex_t m_queueLock;
+
     ThreadPool();
     ~ThreadPool();
 
+    static void* mainThread(void* argc);
+    
     int createThreadPool(int threadCount);
-
     int waitTask();
     int postTask(ThreadTask* task);
 
-    static void* mainThread(void* argc);
-
-    static std::queue<ThreadTask*> m_taskQueue;
-
-    static pthread_mutex_t m_queueLock;
 };
 
- #endif
+#endif

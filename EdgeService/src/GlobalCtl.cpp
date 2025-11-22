@@ -1,7 +1,7 @@
 #include "GlobalCtl.h"
 
 GlobalCtl* GlobalCtl::m_pInstance = NULL;
-GlobalCtl::SUBDOMAININFOLIST GlobalCtl::subDomainInfoList;
+GlobalCtl::SUPDOMAININFOLIST GlobalCtl::supDomainInfoList;
 pthread_mutex_t GlobalCtl::globalLock = PTHREAD_MUTEX_INITIALIZER;
 bool GlobalCtl::gStopPoll = false;
 
@@ -22,17 +22,23 @@ bool GlobalCtl::init(void* param) {
     }
 
     // 当本地配置初始化成功后进行supDomainInfoList的初始化
-    SubDomainInfo info;
-    auto iter = gConfig->subNodeInfoList.begin();
-    for (;iter != gConfig->subNodeInfoList.end(); ++iter) {
+    SupDomainInfo info;
+    auto iter = gConfig->supNodeInfoList.begin();
+    for (;iter != gConfig->supNodeInfoList.end(); ++iter) {
         info.sipId = iter->id;
         info.addrIp = iter->ip;
         info.sipPort = iter->port;
         info.protocal = iter->poto;
-        info.auth = iter->auth;
-        subDomainInfoList.push_back(info);
+        info.expires = iter->expires;
+        if (iter->auth) {
+            info.isAuth = (iter->auth = 1) ? true : false;
+            info.usr = iter->usr;
+            info.pwd = iter->pwd;
+            info.realm = iter->realm;
+        }
+        supDomainInfoList.push_back(info);
     }
-    LOG(INFO)<<"subDomainInfoList.SIZE:"<<subDomainInfoList.size();
+    LOG(INFO)<<"supDomainInfoList.SIZE:"<<supDomainInfoList.size();
 
     if (!gThPool) {
         gThPool = new ThreadPool();
