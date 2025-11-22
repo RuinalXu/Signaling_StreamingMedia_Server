@@ -1,11 +1,14 @@
 #include "SipCore.h"
 #include "SipDef.h"
 #include "GlobalCtl.h"
+#include "SipTaskBase.h"
+#include "SipRegister.h"
+#include "ECThread.h"
+
+using namespace EC;
 
 SipCore::SipCore()
-:m_endpt(NULL) {
-
-}
+:m_endpt(NULL) {}
 
 SipCore::~SipCore() {
     pjsip_endpt_destroy(m_endpt);
@@ -14,25 +17,61 @@ SipCore::~SipCore() {
     GlobalCtl::gStopPoll = true;
 }
 
-/**
- *  轮询线程入口回调函数
- */
-static int pollingEvent(void* arg)
-{
-    LOG(INFO) << "poolling event thread start success";
-    pjsip_endpoint* ept = (pjsip_endpoint*)arg;
-    while(!(GlobalCtl::gStopPoll)) {
-        pj_time_val timeout = {0, 500};
-        pj_status_t status = pjsip_endpt_handle_events(ept, &timeout);
-        if (PJ_SUCCESS != status) {
-            LOG(ERROR) << "polling events failed,code:" << status;
-            return -1;
-        }
+void* SipCore::dealTaskThread(void* arg) {
+    threadParam* param = (threadParam*)arg;
+    if (!param || param->base == NULL) {
+        return NULL;
     }
-    return 0;
+    // 将此线程注册为pjsip管理的线程
+    pj_thread_desc desc;
+    pjcall_thread_register(desc);
+
+    param->base->run(param->data);
+    delete param;
+    param = NULL;
+
+    // 入口线程没有回返值,造成未定义行为,如果涉及到多个进行交互会直接触发Trace/breakpoint trap (core dumped)
+    // 也就是下级一发来请求,上级进程显示:Trace/breakpoint trap (core dumped)
+    // return NULL;
+    
 }
 
+/**
+ *  利用多态在此回调函数中实现不同事件的业务逻辑
+ */
 pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
+    LOG(INFO) << "request msg coming ...";
+    if (rdata == NULL || rdata->msg_info.msg == NULL) {
+        return PJ_FALSE;
+    }
+
+    // 初始化
+    threadParam* param = new threadParam();
+    pjsip_rx_data_clone(rdata, 0, &param->data);
+
+    // 获取SIP消息体
+    pjsip_msg* msg = rdata->msg_info.msg;
+
+    // 依据Reuqest-Line中的Method字段区分请求的业务
+    LOG(INFO) << "request method id:" << msg->line.req.method.id;
+    LOG(INFO) << "request method name:" << msg->line.req.method.name.ptr;
+
+    if (msg->line.req.method.id == PJSIP_REGISTER_METHOD) {
+        param->base = new SipRegister();
+    }
+
+    // 创建线程
+    pthread_t pid;
+    int ret = EC::ECThread::createThread(SipCore::dealTaskThread, param, pid);
+    if (ret != 0) {
+        LOG(ERROR) << "create task thread error";
+        if (param) {
+            delete param;
+            param = NULL;
+        }
+        return PJ_FALSE;
+    }
+
     return PJ_SUCCESS;
 }
 
@@ -52,6 +91,24 @@ static pjsip_module recv_mod =
     NULL,
     NULL,
 };
+
+/**
+ *  轮询线程入口回调函数
+ */
+static int pollingEvent(void* arg)
+{
+    LOG(INFO) << "poolling event thread start success";
+    pjsip_endpoint* ept = (pjsip_endpoint*)arg;
+    while(!(GlobalCtl::gStopPoll)) {
+        pj_time_val timeout = {0, 500};
+        pj_status_t status = pjsip_endpt_handle_events(ept, &timeout);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "polling events failed,code:" << status;
+            return -1;
+        }
+    }
+    return 0;
+}
 
 bool SipCore::InitSip(int sipPort) {
     pj_status_t status;

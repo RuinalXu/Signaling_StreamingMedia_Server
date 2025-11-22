@@ -12,6 +12,13 @@
 #include <memory>
 #include <sstream>
 
+#include <pjlib-util.h>
+#include <pjmedia.h>
+#include <pjsip.h>
+#include <pjsip/sip_auth.h>
+#include <pjlib.h>
+#include <pjsip_ua.h>
+
 using namespace std;
 
 class AutoMutexLock {

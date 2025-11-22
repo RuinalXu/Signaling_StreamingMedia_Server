@@ -47,3 +47,27 @@ bool GlobalCtl::init(void* param) {
     return true;
 }
 
+/**
+ *  查询下级节点是否在列表中
+ */
+ bool GlobalCtl::checkIsExist(string id) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end()) {
+        return true;
+    }
+    return false;
+ }
+/**
+ *  设置下级的生存周期
+ */
+ void GlobalCtl::setExpires(string id, int expires) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end()) {
+        it->expires = expires;
+    }
+ }
+

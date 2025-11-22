@@ -6,6 +6,7 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/time.h>
+#include <algorithm>
 #include "Common.h"
 #include "SipLocalConfig.h"
 #include "ThreadPool.h"
@@ -40,6 +41,7 @@ public:
             lastRegTime = 0;
             auth = false;
         }
+        // 运算符重载,
         bool operator==(string id) {
             return (this->sipId == id);
         }
@@ -83,9 +85,9 @@ public:
     static void free_global_mutex() {
         pthread_mutex_unlock(&globalLock);
     }
-    // static bool checkIsExist(string id);
+    static bool checkIsExist(string id);
+    static void setExpires(string id,int expires);
     // static bool checkIsVaild(string id);
-    // static void setExpires(string id,int expires);
     // static void setRegister(string id,bool registered);
     // static void setLastRegTime(string id,time_t t);
     // static bool getAuth(string id);

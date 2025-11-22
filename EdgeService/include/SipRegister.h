@@ -4,6 +4,9 @@
 #include "GlobalCtl.h"
 #include "TaskTimer.h"
 
+/**
+ *  下级注册请求业务
+ */
 class SipRegister {
 private:
     /**
