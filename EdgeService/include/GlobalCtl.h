@@ -58,13 +58,33 @@ public:
         return supDomainInfoList;
     }
 public:
-    static bool gStopPool;
     SipLocalConfig* gConfig = NULL;
     ThreadPool* gThPool = NULL;
     SipCore* gSipServer = NULL;
+
+    /**
+     *  控制轮询线程的退出
+     */
+    static bool gStopPoll;
+
+    /**
+     * 全局锁,为了使用智能锁从而将其可见性设置为public
+     */
+    static pthread_mutex_t globalLock;
 public:
     static GlobalCtl* instance();
     bool init(void* param);
+
+    /**
+     *  提供全局锁的获取锁和释放锁的接口
+     */
+    static void get_global_mutex() {
+        pthread_mutex_lock(&globalLock);
+    }
+
+    static void free_global_mutex() {
+        pthread_mutex_unlock(&globalLock);
+    }
 private:
     static GlobalCtl* m_pInstance;
     static SUPDOMAININFOLIST supDomainInfoList;

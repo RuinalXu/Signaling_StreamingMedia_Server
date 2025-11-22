@@ -1,9 +1,9 @@
 #include "GlobalCtl.h"
 
 GlobalCtl* GlobalCtl::m_pInstance = NULL;
-bool GlobalCtl::gStopPool = false;
 GlobalCtl::SUPDOMAININFOLIST GlobalCtl::supDomainInfoList;
-
+pthread_mutex_t GlobalCtl::globalLock = PTHREAD_MUTEX_INITIALIZER;
+bool GlobalCtl::gStopPoll = false;
 
 GlobalCtl* GlobalCtl::instance() {
     if (!m_pInstance) {

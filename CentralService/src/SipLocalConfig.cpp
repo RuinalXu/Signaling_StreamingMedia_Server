@@ -36,9 +36,7 @@ SipLocalConfig::SipLocalConfig()
     m_subNodeAuth = 0;
 }
 
-SipLocalConfig::~SipLocalConfig(){
-
-}
+SipLocalConfig::~SipLocalConfig() {}
 
 int SipLocalConfig::ReadConf() {
     int ret = 0;
@@ -104,7 +102,7 @@ int SipLocalConfig::ReadConf() {
         return ret;
     }
     LOG(INFO)<<"localip:"<<m_localIp<<",localport:"<<m_localPort<<",sipid:"<<m_sipId<<",sipip:"<<m_sipIp\
-    <<",sipport:"<<m_sipPort<<",sipRealm"<<m_sipRealm;
+    <<",sipport:"<<m_sipPort<<",sipRealm:"<<m_sipRealm;
 
     int num = m_conf.readInt(keySubNodeNum);
     LOG(INFO)<<"num:"<<num;

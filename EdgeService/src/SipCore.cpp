@@ -9,16 +9,19 @@ SipCore::SipCore()
 
 SipCore::~SipCore() {
     pjsip_endpt_destroy(m_endpt);
+    pj_caching_pool_destroy(&m_cachingPool);
+    pj_shutdown();
+    GlobalCtl::gStopPoll = true;
 }
 
 /**
- *  线程入口回调函数
+ *  轮询线程入口回调函数
  */
-static int poollingEvent(void* arg)
+static int pollingEvent(void* arg)
 {
     LOG(INFO) << "poolling event thread start success";
     pjsip_endpoint* ept = (pjsip_endpoint*)arg;
-    while(!(GlobalCtl::gStopPool)) {
+    while(!(GlobalCtl::gStopPoll)) {
         pj_time_val timeout = {0, 500};
         pj_status_t status = pjsip_endpt_handle_events(ept, &timeout);
         if (PJ_SUCCESS != status) {
@@ -115,9 +118,9 @@ bool SipCore::InitSip(int sipPort) {
             LOG(ERROR)<<"create pool faild";
             break;
         }
-        // 创建线程轮训处理endpoint事务
+        // 创建线程轮询处理endpoint事务
         pj_thread_t* eventThread = NULL;
-        status = pj_thread_create(m_pool, NULL, &poollingEvent, m_endpt, 0, 0, &eventThread);
+        status = pj_thread_create(m_pool, NULL, &pollingEvent, m_endpt, 0, 0, &eventThread);
         if (PJ_SUCCESS != status) {
             LOG(ERROR) << "create pjsip thread faild,code:" << status;
             break;

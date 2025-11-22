@@ -30,21 +30,28 @@ public:
 
     ~AutoMutexLock() {
         LOG(INFO) << "free lock";
+        freeLock();
     }
 private:
     pthread_mutex_t* lock;
+private:
     AutoMutexLock();
     AutoMutexLock(const AutoMutexLock&);
+    AutoMutexLock& operator=(const AutoMutexLock&);
     
     /**
      * 获取锁
      */
-    void getLock(){ pthread_mutex_lock(lock); }
+    void getLock(){ 
+        pthread_mutex_lock(lock);
+    }
 
     /**
      * 释放锁
      */
-    void freeLock() { pthread_mutex_unlock(lock); }
+    void freeLock() {
+        pthread_mutex_unlock(lock);
+    }
 };
 
 #endif

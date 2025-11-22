@@ -27,6 +27,8 @@ static void client_cb(struct pjsip_regc_cbparam *param) {
  */
 void SipRegister::RegisterProc(void* param){
     SipRegister* pthis = (SipRegister*)param;
+    // 定义智能锁,并使用全局锁进行初始化
+    AutoMutexLock lock(&(GlobalCtl::globalLock));
     GlobalCtl::SUPDOMAININFOLIST::iterator iter = GlobalCtl::instance()->getSupDomainInfoList().begin();
     for(;iter != GlobalCtl::instance()->getSupDomainInfoList().end(); iter++) {
         if (!(iter->registered)) {

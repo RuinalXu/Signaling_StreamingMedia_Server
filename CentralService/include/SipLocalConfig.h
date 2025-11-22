@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <queue>
 
-
 class SipLocalConfig {
 private:
     ConfReader m_conf;

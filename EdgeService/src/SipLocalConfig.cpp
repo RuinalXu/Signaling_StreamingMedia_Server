@@ -36,9 +36,7 @@ SipLocalConfig::SipLocalConfig()
     m_supNodeAuth = 0;
 }
 
-SipLocalConfig::~SipLocalConfig(){
-
-}
+SipLocalConfig::~SipLocalConfig() {}
 
 int SipLocalConfig::ReadConf(){
     int ret = 0;

@@ -6,6 +6,7 @@
 #include <pjsip.h>
 #include <pjsip/sip_auth.h>
 #include <pjlib.h>
+#include <pjsip_ua.h>
 #include <Common.h>
 
 
@@ -20,6 +21,7 @@ public:
 
     bool InitSip(int sipPort);
     pj_status_t init_transport_layer(int sipPort);
+    pjsip_endpoint* GetEndPoint() { return m_endpt; }
 };
 
 

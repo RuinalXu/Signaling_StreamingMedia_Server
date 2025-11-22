@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <queue>
 
-
 /**
  *  下级配置
  */ 
@@ -19,9 +18,6 @@ private:
     string m_sipId;
     string m_sipIp;
     int m_sipPort;
-    // string m_usr;
-    // string m_pwd;
-    // string m_sipRealm;
     string m_supNodeIp;
     int m_supNodePort;
     int m_supNodePoto;

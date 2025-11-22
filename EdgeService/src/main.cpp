@@ -41,15 +41,10 @@ int main(int argc, char* argv[]) {
 	LOG(INFO) << "create thread pid:" <<pid;
 	LOG(INFO) << "main thread pid:" <<pthread_self();
 
-
-	LOG(ERROR) << "TEST 111";
-
 	// 启动定时注册服务
 	SipRegister* regc = new SipRegister();
 	regc->registerServiceStart();
 
-	LOG(ERROR) << "main1111";
-    
 	while(true) {
 		sleep(30);
 	}
