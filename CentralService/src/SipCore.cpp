@@ -4,6 +4,7 @@
 #include "SipTaskBase.h"
 #include "SipRegister.h"
 #include "ECThread.h"
+#include <tinyxml2.h>
 
 using namespace EC;
 
@@ -57,7 +58,14 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
     LOG(INFO) << "request method name:" << msg->line.req.method.name.ptr;
 
     if (msg->line.req.method.id == PJSIP_REGISTER_METHOD) {
+        // 如果发送的请求的方法是REGISTER
         param->base = new SipRegister();
+    } else if (msg->line.req.method.id == PJSIP_OTHER_METHOD) {
+        // 如果发送的请求的方法是MESSAGE
+
+        // 解析body部分
+        tinyxml2::XMLDocument* pxmlDoc = NULL;
+        
     }
 
     // 创建线程

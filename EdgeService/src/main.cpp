@@ -3,6 +3,7 @@
 #include "SipLocalConfig.h"
 #include "GlobalCtl.h"
 #include "SipRegister.h"
+#include "SipHeartBeat.h"
 
 
 void* func(void* argc) {
@@ -44,6 +45,10 @@ int main(int argc, char* argv[]) {
 	// 启动定时注册服务
 	SipRegister* regc = new SipRegister();
 	regc->registerServiceStart();
+
+	// 启动定时心跳包的发送
+	SipHeartBeat* heart = new SipHeartBeat();
+	heart->gbHeartBeatServiceStart();
 
 	while(true) {
 		sleep(30);

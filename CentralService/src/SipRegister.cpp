@@ -2,11 +2,15 @@
 #include <time.h>
 
 SipRegister::SipRegister() {
-
+    m_regTimer = new TaskTimer(10);
 }
 
 SipRegister::~SipRegister() {
     LOG(INFO) << "~SipRegister";
+    if (m_regTimer) {
+        delete m_regTimer;
+        m_regTimer = NULL;
+    }
 }
 
 /**
@@ -37,7 +41,10 @@ pj_status_t SipRegister::RegisterRequestMessage(pjsip_msg* msg) {
  */
 pj_status_t SipRegister::dealWithRegister(pjsip_rx_data* rdata) {
     // 获取from字段
-
+    string random = GlobalCtl::randomNum(32);
+    LOG(INFO) << "random:" << random;
+    pjsip_msg* msg = rdata->msg_info.msg;
+    string fromId = parseFromId(msg);
     // 截取from字段中的from Id,判断下级是否合法
 
     // 对多个下级进行白名单查询,如果找到了from Id对应的下级,那么就解析Expires字段的值,如果是0,那就是下级向上级发送的注销请求,如果大于0,那么
@@ -64,4 +71,16 @@ pj_status_t SipRegister::dealWithRegister(pjsip_rx_data* rdata) {
  */
 pj_status_t SipRegister::dealWithAuthorRegister(pjsip_rx_data *rdata) {
     // 配置文件中开启了鉴权,回复下级401,让下级进行鉴权注册
+
+    pjsip_endpt_create_response()
+
+    pjsip_endpt_respond()
 }
+
+/**
+ *  上级定时检查已注册下级的生存期
+ */
+void SipRegister::RegisterCheckProc(void* param) {
+
+}
+

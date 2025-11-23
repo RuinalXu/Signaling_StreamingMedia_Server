@@ -1,4 +1,4 @@
-#include "SipMessage.h"
+#include "SipMessageHeader.h"
 
 SipMessage::SipMessage() {
     memset(fromHeader, 0, sizeof(fromHeader));

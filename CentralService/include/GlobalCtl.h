@@ -51,6 +51,7 @@ public:
         int protocal;
         int registered;
         int expires;
+        // 最后的注册时间
         time_t lastRegTime;
         bool auth;
     } SubDomainInfo;
@@ -87,9 +88,10 @@ public:
     }
     static bool checkIsExist(string id);
     static void setExpires(string id,int expires);
+    static void setRegister(string id,bool registered);
+    static void setLastRegTime(string id,time_t t);
+    static string randomNum(int length);
     // static bool checkIsVaild(string id);
-    // static void setRegister(string id,bool registered);
-    // static void setLastRegTime(string id,time_t t);
     // static bool getAuth(string id);
 private:
     static GlobalCtl* m_pInstance;

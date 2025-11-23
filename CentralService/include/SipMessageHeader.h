@@ -26,6 +26,9 @@ public:
     inline char* ToHeader(){ return toHeader; }
     inline char* RequestUrl(){ return requestUrl; }
     inline char* Contact(){ return contact; }
+public:
+    static string parseFromId(pjsip_msg* msg);
+    static tinyxml2::XMLElement* parseXmlData(pjsip_msg* msg, string& rootType, const string xmlkey, string& xmlvalue);
 };
 
 #endif

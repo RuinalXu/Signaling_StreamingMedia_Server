@@ -2,6 +2,7 @@
 #include "LogManager.h"
 #include "SipLocalConfig.h"
 #include "GlobalCtl.h"
+#include "SipRegister.h"
 
 
 int main(int argc, char* argv[]) {
@@ -22,6 +23,19 @@ int main(int argc, char* argv[]) {
 		LOG(ERROR) << "init error";
 		return -1;
 	}
+
+	pthread_t pid;
+	ret = EC::ECThread::createThread(func, NULL, pid);
+	if (ret != 0) {
+		ret = -1;
+		LOG(ERROR)<<"create thread error";
+		return ret;
+	}
+	LOG(INFO) << "create thread pid:" <<pid;
+	LOG(INFO) << "main thread pid:" <<pthread_self();
+
+	// 上级启动定时检查
+	SipRegister* regc = new SipRegister();
 
 	while(true)
 	{

@@ -1,6 +1,6 @@
 #include "SipRegister.h"
 #include "Common.h"
-#include "SipMessage.h"
+#include "SipMessageHeader.h"
 
 SipRegister::SipRegister() {
     m_regTimer = new TaskTimer(3);
