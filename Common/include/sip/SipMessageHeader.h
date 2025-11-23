@@ -1,11 +1,8 @@
-#ifndef SIP_MESSAGE_H
-#define SIP_MESSAGE_H
-
-#include "Common.h"
-#include "GlobalCtl.h"
+#ifndef SIP_MESSAGE_HEADER_H
+#define SIP_MESSAGE_HEADER_H
 
 /**
- *  SIP消息封装类
+ *  SIP Message Header字段以及操作的封装类
  */
 class SipMessage {
 private:
@@ -26,9 +23,7 @@ public:
     inline char* ToHeader(){ return toHeader; }
     inline char* RequestUrl(){ return requestUrl; }
     inline char* Contact(){ return contact; }
-public:
-    static string parseFromId(pjsip_msg* msg);
-    static tinyxml2::XMLElement* parseXmlData(pjsip_msg* msg, string& rootType, const string xmlkey, string& xmlvalue);
 };
 
 #endif
+

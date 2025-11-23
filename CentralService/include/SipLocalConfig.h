@@ -2,7 +2,7 @@
 #define SIP_LOCAL_CONFIG_H
 
 #include "ConfReader.h"
-#include "Common.h"
+#include <mutex/AutoMutexLock.h>
 #include <list>
 #include <algorithm>
 #include <queue>

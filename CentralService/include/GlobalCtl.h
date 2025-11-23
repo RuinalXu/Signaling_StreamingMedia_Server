@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <algorithm>
-#include "Common.h"
+#include <mutex/AutoMutexLock.h>
 #include "SipLocalConfig.h"
 #include "ThreadPool.h"
 #include "SipCore.h"

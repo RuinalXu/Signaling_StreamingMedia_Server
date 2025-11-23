@@ -1,4 +1,6 @@
-#include "SipMessageHeader.h"
+#include "sip/SipMessageHeader.h"
+#include <string.h>
+#include <stdio.h>
 
 SipMessage::SipMessage() {
     memset(fromHeader, 0, sizeof(fromHeader));
@@ -24,4 +26,3 @@ void SipMessage::setUrl(char* sipId, char* url_ip, int url_port, char* url_proto
 void SipMessage::setContact(char* sipId, char* natIp, int natPort) {   
     sprintf(contact, "sip:%s@%s:%d", sipId, natIp, natPort);
 }
-

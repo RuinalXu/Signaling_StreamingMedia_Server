@@ -2,13 +2,14 @@
 #define LOG_MANAGER_H
 
 #include <filesystem>
-#include <string>
-#include <signal.h>
 #include <glog/logging.h>
 
 #define LOG_DIR "./logs"
 #define LOG_FILE_NAME "CentralServer.log"
 
+/**
+ *  glog初始化
+ */
 class GlogInitializer {
 public:
     explicit GlogInitializer(const int type) {

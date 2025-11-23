@@ -1,6 +1,8 @@
 #ifndef SIP_TASK_BASE_H
 #define SIP_TASK_BASE_H
-#include "Common.h"
+
+#include <log/LogManager.h>
+
 /**
  *  上级用于处理不同类型SIP请求的基类
  */

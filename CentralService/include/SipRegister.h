@@ -2,7 +2,6 @@
 #define SIP_REGISTER_H
 
 #include "SipTaskBase.h"
-#include "Common.h"
 #include "SipDef.h"
 #include "TaskTimer.h"
 

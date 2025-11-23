@@ -7,7 +7,6 @@
 #include <pjsip/sip_auth.h>
 #include <pjlib.h>
 #include <pjsip_ua.h>
-#include <Common.h>
 
 
 class SipCore {

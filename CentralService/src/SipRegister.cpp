@@ -18,7 +18,7 @@ SipRegister::~SipRegister() {
  */
 pj_status_t SipRegister::run(pjsip_rx_data* rdata) {
     // 处理多种业务请求
-    pjsip_msg* msg = rdata->msg_info.msg;
+    pjsip_msg* msg = (pjsip_msg*)rdata->msg_info.msg;
     return RegisterRequestMessage(msg);
 }
 

@@ -75,3 +75,5 @@ target_link_libraries(${EXE_NAME} PRIVATE
     ${PJLIB_LIB}
 )
 
+# 引入自定义静态库
+target_link_libraries(${EXE_NAME} PRIVATE Common)
