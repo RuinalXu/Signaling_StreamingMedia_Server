@@ -1,5 +1,21 @@
 #include "SipHeartBeat.h"
 #include <sip/SipMessageHeader.h>
+#include <utils/XmlParser.h>
+
+int SipHeartBeat::m_snIndex = 0;
+
+/**
+ *  静态函数,但非静态成员函数
+ *  响应回调函数
+ */
+static void response_callback(void *token, pjsip_event *e) {
+    pjsip_transaction* tsx = e->body.tsx_state.tsx;
+    GlobalCtl::SupDomainInfo* node = (GlobalCtl::SupDomainInfo*)token;
+    if (tsx->status_code != 200) {
+        node->registered = false;
+    }
+    return;
+}
 
 SipHeartBeat::SipHeartBeat() {
     m_heartTimer = new TaskTimer(10);
@@ -9,6 +25,13 @@ SipHeartBeat::~SipHeartBeat() {
     if (m_heartTimer) {
         delete m_heartTimer;
         m_heartTimer = NULL;
+    }
+}
+
+void SipHeartBeat::gbHeartBeatServiceStart() {
+    if (m_heartTimer) {
+        m_heartTimer->setTimerFun(HeartBeatProc, this);
+        m_heartTimer->start();
     }
 }
 
@@ -25,13 +48,6 @@ void SipHeartBeat::HeartBeatProc(void* param) {
     }
 }
 
-void SipHeartBeat::gbHeartBeatServiceStart() {
-    if (m_heartTimer) {
-        m_heartTimer->setTimerFun(HeartBeatProc, this);
-        m_heartTimer->start();
-    }
-}
-
 int SipHeartBeat::gbHeartBeat(GlobalCtl::SupDomainInfo& node) {
     // 封装消息
     SipMessage msg;
@@ -45,5 +61,33 @@ int SipHeartBeat::gbHeartBeat(GlobalCtl::SupDomainInfo& node) {
     string method = "MESSAGE";
     pjsip_method reqMethod = {PJSIP_OTHER_METHOD, {(char*)method.c_str(), method.length()}};
     pjsip_tx_data* tdata;
+    pj_status_t status = pjsip_endpt_create_request(GBOJ(gSipServer)->GetEndPoint(), &reqMethod, &line, &from, &to, NULL, NULL, -1, NULL, &tdata);
+    if (PJ_SUCCESS != status) {
+        LOG(ERROR) << "pjsip_endpt_create_request ERROR";
+        return -1;
+    }
+    char strIndex[16] = {0};
+    sprintf(strIndex, "%d", m_snIndex++);
+    XmlParser parse;
+    tinyxml2::XMLElement* rootNode = parse.addRootNode((char*)"Notify");
+    parse.insertSubNode(rootNode, (char*)"CmdType", (char*)"keepalive");
+    parse.insertSubNode(rootNode, (char*)"SN", strIndex);
+    parse.insertSubNode(rootNode, (char*)"DeviceID", GBOJ(gConfig)->sipId().c_str());
+    parse.insertSubNode(rootNode, (char*)"Status", (char*)"OK");
+    char* xmlbuf = new char[1024];
+    memset(xmlbuf, 0, 1024);
+    parse.getXmlData(xmlbuf);
+    LOG(INFO) << "xmlbuf:" << xmlbuf;
 
+    pj_str_t type = pj_str("Application");
+    pj_str_t subtype = pj_str("MANSCDP+xml");
+    pj_str_t xmldata = pj_str(xmlbuf);
+    tdata->msg->body = pjsip_msg_body_create(tdata->pool, &type, &subtype, &xmldata);
+
+    status = pjsip_endpt_send_request(GBOJ(gSipServer)->GetEndPoint(), tdata, -1, &node, &response_callback);
+    if (PJ_SUCCESS != status) {
+        LOG(ERROR)<<"pjsip_endpt_send_request ERROR";
+        return -1;
+    }
+    return 0;
 }

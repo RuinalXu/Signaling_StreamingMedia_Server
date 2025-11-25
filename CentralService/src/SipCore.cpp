@@ -1,10 +1,11 @@
+#include <tinyxml2.h>
+#include <thread/ECThread.h>
+#include <sip/SipDef.h>
 #include "SipCore.h"
-#include "SipDef.h"
 #include "GlobalCtl.h"
 #include "SipTaskBase.h"
 #include "SipRegister.h"
-#include "ECThread.h"
-#include <tinyxml2.h>
+
 
 using namespace EC;
 
@@ -12,12 +13,16 @@ SipCore::SipCore()
 :m_endpt(NULL) {}
 
 SipCore::~SipCore() {
+    pjmedia_endpt_destroy(m_mediaEndpt);
     pjsip_endpt_destroy(m_endpt);
     pj_caching_pool_destroy(&m_cachingPool);
     pj_shutdown();
     GlobalCtl::gStopPoll = true;
 }
 
+/**
+ *  SipCore的线程入口函数
+ */
 void* SipCore::dealTaskThread(void* arg) {
     threadParam* param = (threadParam*)arg;
     if (!param || param->base == NULL) {
@@ -34,7 +39,6 @@ void* SipCore::dealTaskThread(void* arg) {
     // 入口线程没有回返值,造成未定义行为,如果涉及到多个进行交互会直接触发Trace/breakpoint trap (core dumped)
     // 也就是下级一发来请求,上级进程显示:Trace/breakpoint trap (core dumped)
     // return NULL;
-    
 }
 
 /**
@@ -143,9 +147,18 @@ bool SipCore::InitSip(int sipPort) {
         // 初始化pjsip重要模块: endpoint, transcation, dialog, transport
         // 一个pjsip进程只有一个endpoint对象,其他三个模块都有由endpoint进行管理的.
         pj_caching_pool_init(&m_cachingPool, NULL, SIP_STACK_SIZE);
+
+        // 创建pjsip的endpoint对象
         status = pjsip_endpt_create(&m_cachingPool.factory, NULL, &m_endpt);
         if (PJ_SUCCESS != status) {
             LOG(ERROR) << "create endpt faild,code:" << status;
+            break;
+        }
+        // 创建pjsip的pjmedia对象
+        pj_ioqueue_t* ioqueue = pjsip_endpt_get_ioqueue(m_endpt);
+        status = pjmedia_endpt_create(&m_cachingPool.factory, ioqueue, 0, &m_mediaEndpt);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR)<<"create media endpoint faild,code:"<<status;
             break;
         }
 
@@ -170,14 +183,29 @@ bool SipCore::InitSip(int sipPort) {
             break;
         }
 
-        // 自定模块注册到endpoint中
+        // 将自定模块注册到endpoint中
         pjsip_endpt_register_module(m_endpt, &recv_mod);
         if (PJ_SUCCESS != status) {
             LOG(ERROR) << "register recv_mod faild,code:" << status;
             break;
         }
 
+        // 添加对INVITE事件的回调的初始化
+        pjsip_inv_callback inv_cb;
+        pj_bzero(&inv_cb,  sizeof(inv_cb));
+        inv_cb.on_state_changed = NULL;
+        inv_cb.on_new_session = NULL;
+        inv_cb.on_media_update = NULL;
+        inv_cb.on_send_ack = NULL;
+        // 将INVITE事件的回调函数注册到endpoint对象中
+        status = pjsip_inv_usage_init(m_endpt,&inv_cb);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR)<<"register invite module faild,code:"<<status;
+            break;
+        }
+
         // 给endpoint分配内存池后,endpoint才能对其他模块进行内存分配管理
+        // de用于处理网络媒体数据的收发，以及流的传输的功能
         m_pool = pjsip_endpt_create_pool(m_endpt, NULL, SIP_ALLOC_POOL_1M, SIP_ALLOC_POOL_1M);
         if (NULL == m_pool) {
             LOG(ERROR)<<"create pool faild";

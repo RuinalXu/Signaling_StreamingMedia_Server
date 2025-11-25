@@ -1,12 +1,13 @@
 #ifndef THREAD_POOL_H
 #define THREAD_POOL_H
 
-#include "ECThread.h"
 #include <queue>
 #include <unistd.h>
 #include <semaphore.h>
+#include "ECThread.h"
 
 using namespace EC;
+using namespace std;
 
 class ThreadTask {
 public:

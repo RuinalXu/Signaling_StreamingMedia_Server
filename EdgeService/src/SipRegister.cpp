@@ -12,11 +12,14 @@ SipRegister::~SipRegister() {
     }
 }
 
+/**
+ *  静态函数,但非成员静态函数
+ */
 static void client_cb(struct pjsip_regc_cbparam *param) {
     LOG(INFO) << "code:" << param->code;
     if (param->code == 200) {
         GlobalCtl::SupDomainInfo* subinfo = (GlobalCtl::SupDomainInfo*)param->token;
-        subinfo->registered =true;
+        subinfo->registered = true;
     }
     return;
 }
@@ -82,6 +85,23 @@ int SipRegister::gbRegister(GlobalCtl::SupDomainInfo& node) {
             pjsip_regc_destroy(regc);
             LOG(ERROR) << "pjsip_regc_init error";
             break;
+        }
+
+        if (node.isAuth) {
+            pjsip_cred_info cred;
+            pj_bzero(&cred, sizeof(pjsip_cred_info));
+            cred.scheme = pj_str("digest");
+            cred.realm = pj_str((char*)node.realm.c_str());
+            cred.username = pj_str((char*)node.usr.c_str());
+            cred.data_type = PJSIP_CRED_DATA_PLAIN_PASSWD;
+            cred.data = pj_str((char*)node.pwd.c_str());
+
+            pjsip_regc_set_credentials(regc, 1, &cred);
+            if (PJ_SUCCESS != status) {
+                pjsip_regc_destroy(regc);
+                LOG(ERROR) << "pjsip_regc_set_credentials error";
+                break;
+            }
         }
 
         pjsip_tx_data* tdata = NULL;

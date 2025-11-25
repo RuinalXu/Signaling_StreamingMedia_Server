@@ -122,3 +122,12 @@ string GlobalCtl::randomNum(int length) {
     }
     return ss.str();
 }
+
+bool GlobalCtl::getAuth(string id) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(),subDomainInfoList.end(),id);
+    if (it != subDomainInfoList.end()) {
+        return it->auth;
+    }
+}

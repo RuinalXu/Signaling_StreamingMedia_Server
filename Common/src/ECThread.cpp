@@ -1,4 +1,4 @@
-#include "ECThread.h"
+#include "thread/ECThread.h"
 
 using namespace EC;
 

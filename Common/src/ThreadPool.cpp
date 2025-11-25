@@ -1,5 +1,5 @@
-#include "ThreadPool.h"
-#include "GlobalCtl.h"
+#include "thread/ThreadPool.h"
+#include "log/LogManager.h"
 
 pthread_mutex_t ThreadPool::m_queueLock;
 queue<ThreadTask*> ThreadPool::m_taskQueue;
@@ -32,13 +32,13 @@ void* ThreadPool::mainThread(void* argc) {
             }
         }
     } while(true);
-    // return NULL;
 }
 
 int ThreadPool::createThreadPool(int threadCount) {
     if (threadCount <= 0) {
         LOG(ERROR) << "thread count error";
     }
+
     for (int i = 0; i < threadCount; i++) {
         pthread_t pid;
         if (EC::ECThread::createThread(ThreadPool::mainThread, (void*)this, pid) < 0){
@@ -46,6 +46,7 @@ int ThreadPool::createThreadPool(int threadCount) {
         }
         LOG(INFO) << "thread:" << pid << " was created";
     }
+    // 未定义返回值,导致发生未定义行为:[Trace/breakpoint trap (core dumped)]
     return 0;
 }
 
@@ -55,7 +56,6 @@ int ThreadPool::waitTask() {
     if (ret != 0) {
         LOG(ERROR) << "the api exec error";
     }
-    return ret;
 }
 
 int ThreadPool::postTask(ThreadTask* task) {
@@ -66,5 +66,4 @@ int ThreadPool::postTask(ThreadTask* task) {
         sem_post(&m_signalSem);
     }
 }
-
 

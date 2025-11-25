@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "ConfReader.h"
+#include "utils/ConfReader.h"
 
 #define MAX_INI_FILE_SIZE 1024*10
 

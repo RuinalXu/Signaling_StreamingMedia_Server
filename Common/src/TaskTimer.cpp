@@ -1,6 +1,7 @@
-#include "TaskTimer.h"
-#include "ECThread.h"
+#include "timer/TaskTimer.h"
+#include "thread/ECThread.h"
 #include "log/LogManager.h"
+#include <pjlib.h>
 
 using namespace EC;
 
@@ -34,6 +35,9 @@ void TaskTimer::setTimerFun(timerCallBack fun, void* param) {
     m_funParam = param;
 }
 
+/**
+ *  TaskTimer定时器的线程入口函数
+ */
 void* TaskTimer::timer(void* context) {
     // 计算时间，到时间后调用成员指针m_timerFun去执行用户指定的任务
     TaskTimer* pthis = (TaskTimer*)context;
@@ -56,9 +60,16 @@ void* TaskTimer::timer(void* context) {
             // 到达定时时间后，先更新lastTm
             lastTm = curTm;
             if (pthis->m_timerFun != NULL) {
-                // 将TaskTimer线程进行注册
-                pj_thread_desc desc;
-                pjcall_thread_register(desc);
+                // TODO:(可优化)将TaskTimer线程进行注册
+                if (!pj_thread_is_registered()) {
+                    pj_thread_desc desc;
+                    pj_thread_t* thread = 0;
+                    pj_status_t status;
+                    status = pj_thread_register(NULL, desc, &thread);
+                    if (status != PJ_SUCCESS) {
+                        LOG(ERROR) << "thread register error";
+                    }
+                }
                 pthis->m_timerFun(pthis->m_funParam);
             }
         } else {

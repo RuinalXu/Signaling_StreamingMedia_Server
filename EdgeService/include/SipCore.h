@@ -14,6 +14,7 @@ private:
     pjsip_endpoint* m_endpt;
     pj_caching_pool m_cachingPool;
     pj_pool_t* m_pool;
+    pjmedia_endpt* m_mediaEndpt;
 public:
     SipCore();
     ~SipCore();

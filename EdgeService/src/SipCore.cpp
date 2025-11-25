@@ -1,5 +1,5 @@
+#include <sip/SipDef.h>
 #include "SipCore.h"
-#include "SipDef.h"
 #include "GlobalCtl.h"
 
 SipCore::SipCore()
@@ -39,7 +39,7 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
 static pjsip_module recv_mod =
 {
     NULL,NULL,
-    {"mod-recv",8},
+    {"mod-recv", 8},
     -1,
     PJSIP_MOD_PRIORITY_APPLICATION,
     NULL,
@@ -84,6 +84,14 @@ bool SipCore::InitSip(int sipPort) {
             break;
         }
 
+        // 初始化pjmedia
+        pj_ioqueue_t* ioqueue = pjsip_endpt_get_ioqueue(m_endpt);
+        status = pjmedia_endpt_create(&m_cachingPool.factory, ioqueue, 0, &m_mediaEndpt);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "create media endpoint faild,code:" << status;
+            break;
+        }
+
         // 初始化事务层
         status = pjsip_tsx_layer_init_module(m_endpt);
         if (PJ_SUCCESS != status) {
@@ -112,6 +120,26 @@ bool SipCore::InitSip(int sipPort) {
             break;
         }
 
+/*
+        // 初始化
+        status = pjsip_100rel_init_module(m_endpt);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "100rel module init faild,code:" << status;
+            break;
+        }
+
+        // 
+        pjsip_inv_callback inv_cb;
+        pj_bzero(&inv_cb,sizeof(inv_cb));
+        inv_cb.on_state_changed = &SipGbPlay::OnStateChanged;
+        inv_cb.on_new_session = &SipGbPlay::OnNewSession;
+        inv_cb.on_media_update = &SipGbPlay::OnMediaUpdate;
+        status = pjsip_inv_usage_init(m_endpt, &inv_cb);
+        if (PJ_SUCCESS != status) {
+            LOG(ERROR) << "register invite module faild,code:" << status;
+            break;
+        }
+*/
         // 给endpoint分配内存池后,endpoint才能对其他模块进行内存分配管理
         m_pool = pjsip_endpt_create_pool(m_endpt, NULL, SIP_ALLOC_POOL_1M, SIP_ALLOC_POOL_1M);
         if (NULL == m_pool) {

@@ -3,7 +3,19 @@
 #include "SipLocalConfig.h"
 #include "GlobalCtl.h"
 #include "SipRegister.h"
+#include <signal.h>
 
+/**
+ * 	main线程号
+ */
+void* func(void* argc)
+{
+	pthread_t id = pthread_self();
+	LOG(INFO) << "current thread id:" << id;
+
+
+	return NULL;
+}
 
 int main(int argc, char* argv[]) {
     GlogInitializer glogInit(0);

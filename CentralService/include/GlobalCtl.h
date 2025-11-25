@@ -8,11 +8,10 @@
 #include <sys/time.h>
 #include <algorithm>
 #include <mutex/AutoMutexLock.h>
+#include <thread/ThreadPool.h>
+#include <sip/SipDef.h>
 #include "SipLocalConfig.h"
-#include "ThreadPool.h"
 #include "SipCore.h"
-#include "SipDef.h"
-
 
 class GlobalCtl;
 #define GBOJ(obj) GlobalCtl::instance()->obj
@@ -91,8 +90,8 @@ public:
     static void setRegister(string id,bool registered);
     static void setLastRegTime(string id,time_t t);
     static string randomNum(int length);
+    static bool getAuth(string id);
     // static bool checkIsVaild(string id);
-    // static bool getAuth(string id);
 private:
     static GlobalCtl* m_pInstance;
     static SUBDOMAININFOLIST subDomainInfoList;

@@ -1,9 +1,9 @@
 #ifndef SIP_REGISTER_H
 #define SIP_REGISTER_H
 
+#include <sip/SipDef.h>
+#include <timer/TaskTimer.h>
 #include "SipTaskBase.h"
-#include "SipDef.h"
-#include "TaskTimer.h"
 
 /**
  *  上级处理注册相关业务
@@ -19,11 +19,11 @@ public:
     ~SipRegister();
 
     virtual pj_status_t run(pjsip_rx_data* rdata);
-    pj_status_t RegisterRequestMessage(pjsip_rx_data *rdata);
+    pj_status_t registerRequestMessage(pjsip_rx_data *rdata);
     pj_status_t dealWithRegister(pjsip_rx_data* rdata);
     pj_status_t dealWithAuthorRegister(pjsip_rx_data *rdata);
     void registerServiceStart();
-    static void RegisterCheckProc(void* param);
+    static void registerCheckProc(void* param);
 };
 
 
