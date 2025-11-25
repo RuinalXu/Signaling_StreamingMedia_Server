@@ -46,7 +46,14 @@ find_library(PJLIB_LIB pj-aarch64-unknown-linux-gnu PATHS ${PJLIB_ROOT}/lib NO_D
 find_library(PJSIP_LIB pjsip-aarch64-unknown-linux-gnu PATHS ${PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(PJSIP_UA_LIB pjsip-ua-aarch64-unknown-linux-gnu PATHS ${PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(PJLIB_UTIL_LIB pjlib-util-aarch64-unknown-linux-gnu PATHS ${PJLIB_UTIL_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+# pjmdeia相关连接库
 find_library(PJMEDIA_LIB pjmedia-aarch64-unknown-linux-gnu PATHS ${PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJMEDIA_LIB pjmedia-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJMEDIA_AUDIODEV pjmedia-audiodev-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJMEDIA_VIDEODEV pjmedia-videodev-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJMEDIA_SDP pjsdp-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJMEDIA_CODEC pjmedia-codec-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+# pjnath相关链接库
 find_library(PJNATH_LIB pjnath-aarch64-unknown-linux-gnu PATHS ${PJNATH_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
@@ -55,6 +62,7 @@ find_package(gflags CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(tinyxml2 CONFIG REQUIRED)
 find_package(Libevent CONFIG REQUIRED)
+find_package(libSRTP CONFIG REQUIRED)
 
 target_link_libraries(${EXE_NAME} PRIVATE
     fmt::fmt
@@ -67,12 +75,27 @@ target_link_libraries(${EXE_NAME} PRIVATE
 )
 
 target_link_libraries(${EXE_NAME} PRIVATE
+    # 高层应用逻辑
     ${PJSIP_UA_LIB}
     ${PJSIP_LIB}
+
+    # 媒体相关（pjmedia 及其组件）
+    ${PJMEDIA_AUDIODEV}
+    ${PJMEDIA_VIDEODEV}
+    ${PJMEDIA_CODEC}
+    ${PJMEDIA_SDP}
     ${PJMEDIA_LIB}
+
+    # 网络/NAT 穿透
     ${PJNATH_LIB}
+
+    # 工具库
     ${PJLIB_UTIL_LIB}
+
+    # 核心基础库（必须最后）
     ${PJLIB_LIB}
+
+    libSRTP::srtp2
 )
 
 # 引入自定义静态库

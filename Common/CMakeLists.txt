@@ -19,10 +19,10 @@ target_compile_definitions(Common PRIVATE PJ_IS_LITTLE_ENDIAN=1)
 
 target_include_directories(Common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(Common PRIVATE ${PJPROJECT_PJLIB_ROOT}/include)
-# target_include_directories(Common PRIVATE ${PJPROJECT_PJSIP_ROOT}/include)
+target_include_directories(Common PRIVATE ${PJPROJECT_PJSIP_ROOT}/include)
 
 find_library(PJLIB_LIB pj-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJLIB_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-# find_library(PJSIP_LIB pjsip-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJSIP_UA_LIB pjsip-ua-aarch64-unknown-linux-gnu PATHS ${PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(glog CONFIG REQUIRED)
@@ -44,5 +44,6 @@ target_link_libraries(Common PRIVATE
 # )
 
 target_link_libraries(Common PRIVATE
+    ${PJSIP_UA_LIB}
     ${PJLIB_LIB}
 )

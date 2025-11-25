@@ -44,7 +44,7 @@ add_definitions(-g)
 # 查找所需要的pjproject库
 find_library(PJLIB_LIB pj-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJLIB_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(PJSIP_LIB pjsip-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(PJSIP_UA_LIB pjsip-ua-aarch64-unknown-linux-gnu PATHS ${PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(PJSIP_UA_LIB pjsip-ua-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJSIP_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(PJLIB_UTIL_LIB pjlib-util-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJLIB_UTIL_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 # pjmdeia相关连接库
 find_library(PJMEDIA_LIB pjmedia-aarch64-unknown-linux-gnu PATHS ${PJPROJECT_PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
