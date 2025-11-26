@@ -86,7 +86,7 @@ int SipRegister::gbRegister(GlobalCtl::SupDomainInfo& node) {
             LOG(ERROR) << "pjsip_regc_init error";
             break;
         }
-
+/*
         if (node.isAuth) {
             pjsip_cred_info cred;
             pj_bzero(&cred, sizeof(pjsip_cred_info));
@@ -103,7 +103,7 @@ int SipRegister::gbRegister(GlobalCtl::SupDomainInfo& node) {
                 break;
             }
         }
-
+*/
         pjsip_tx_data* tdata = NULL;
         status = pjsip_regc_register(regc, PJ_TRUE, &tdata);
         if (PJ_SUCCESS != status) {

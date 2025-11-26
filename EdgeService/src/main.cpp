@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     GlogInitializer glogInit(0);
 
     // 忽略control+c的信号
-    signal(SIGINT, SIG_IGN);
+    // signal(SIGINT, SIG_IGN);
 
 	// 本地配置信息初始化
 	LOG(INFO) << "[EdgeService] local config init ...";

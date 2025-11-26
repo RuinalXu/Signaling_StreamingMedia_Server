@@ -56,13 +56,6 @@ target_link_libraries(Common PRIVATE
 )
 
 target_link_libraries(Common PRIVATE
-    ${PJSIP_UA_LIB}
-    ${PJSIP_LIB}
-    ${PJLIB_UTIL_LIB}
-    ${PJLIB_LIB}
-)
-
-target_link_libraries(Common PRIVATE
     # 高层应用逻辑
     ${PJSIP_UA_LIB}
     ${PJSIP_LIB}

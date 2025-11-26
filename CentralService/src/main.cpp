@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     GlogInitializer glogInit(0);
 
     // 忽略control+c的信号
-    signal(SIGINT, SIG_IGN);
+    // signal(SIGINT, SIG_IGN);
 
     SipLocalConfig* config = new SipLocalConfig();
     int ret = config->ReadConf();
@@ -48,6 +48,7 @@ int main(int argc, char* argv[]) {
 
 	// 上级启动定时检查
 	SipRegister* regc = new SipRegister();
+	regc->registerServiceStart();
 
 	while(true)
 	{

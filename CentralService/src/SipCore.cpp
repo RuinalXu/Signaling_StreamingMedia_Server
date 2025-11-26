@@ -62,14 +62,26 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
     LOG(INFO) << "request method name:" << msg->line.req.method.name.ptr;
 
     if (msg->line.req.method.id == PJSIP_REGISTER_METHOD) {
+        LOG(ERROR) << "11111111";
         // 如果发送的请求的方法是REGISTER
         param->base = new SipRegister();
     } else if (msg->line.req.method.id == PJSIP_OTHER_METHOD) {
         // 如果发送的请求的方法是MESSAGE
-
-        // 解析body部分
-        tinyxml2::XMLDocument* pxmlDoc = NULL;
-        
+        string rootType = "", cmdType = "CmdType", cmdValue;
+        tinyxml2::XMLElement* root = SipTaskBase::parseXmlData(msg, rootType, cmdType, cmdValue);
+        LOG(INFO) << "rootType:" << rootType;
+        LOG(INFO) << "cmdValue:" << cmdValue;
+        // if (rootType == SIP_NOTIFY && cmdValue == SIP_HEARTBEAT) {
+        //     param->base = new SipHeartBeat();
+        // }
+        // else if (rootType == SIP_RESPONSE) {
+        //     if (cmdValue == SIP_CATALOG) {
+        //         param->base = new SipDirectory(root);
+        //     }
+        //     else if (cmdValue == SIP_RECORDINFO) {
+        //         param->base = new SipRecordList(root);
+        //     }
+        // }
     }
 
     // 创建线程
@@ -83,7 +95,6 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
         }
         return PJ_FALSE;
     }
-
     return PJ_SUCCESS;
 }
 
@@ -189,7 +200,7 @@ bool SipCore::InitSip(int sipPort) {
             LOG(ERROR) << "register recv_mod faild,code:" << status;
             break;
         }
-
+/*
         // 添加对INVITE事件的回调的初始化
         pjsip_inv_callback inv_cb;
         pj_bzero(&inv_cb,  sizeof(inv_cb));
@@ -203,7 +214,7 @@ bool SipCore::InitSip(int sipPort) {
             LOG(ERROR)<<"register invite module faild,code:"<<status;
             break;
         }
-
+*/
         // 给endpoint分配内存池后,endpoint才能对其他模块进行内存分配管理
         // de用于处理网络媒体数据的收发，以及流的传输的功能
         m_pool = pjsip_endpt_create_pool(m_endpt, NULL, SIP_ALLOC_POOL_1M, SIP_ALLOC_POOL_1M);
