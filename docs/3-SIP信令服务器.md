@@ -100,3 +100,5 @@ Aborted (core dumped)
 
 # 目录树请求与推送
 
+# 11月26日遇到的问题
+GlobalCtl::getAuth(parseFromId(msg))在线程中被阻塞了，线程池中线程一直在获取锁，没有释放锁，原因，`AutoMutexLock`自定义自动锁类中的析构函数函数中没有调用释放锁函数；

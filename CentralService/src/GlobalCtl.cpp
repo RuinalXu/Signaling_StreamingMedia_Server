@@ -53,6 +53,7 @@ bool GlobalCtl::init(void* param) {
  bool GlobalCtl::checkIsExist(string id) {
     AutoMutexLock lck(&globalLock);
     SUBDOMAININFOLIST::iterator it;
+    LOG(ERROR) << "id = " << id;
     it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
     if (it != subDomainInfoList.end()) {
         return true;
@@ -126,8 +127,9 @@ string GlobalCtl::randomNum(int length) {
 bool GlobalCtl::getAuth(string id) {
     AutoMutexLock lck(&globalLock);
     SUBDOMAININFOLIST::iterator it;
-    it = std::find(subDomainInfoList.begin(),subDomainInfoList.end(),id);
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
     if (it != subDomainInfoList.end()) {
         return it->auth;
     }
+    return false;
 }

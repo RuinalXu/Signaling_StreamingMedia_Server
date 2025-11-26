@@ -21,6 +21,7 @@ public:
 
     ~AutoMutexLock() {
         LOG(INFO) << "free lock";
+        freeLock();
     }
 private:
     pthread_mutex_t* lock;

@@ -6,7 +6,6 @@
 #include "GlobalCtl.h"
 #include "SipRegister.h"
 
-
 using namespace EC;
 
 SipCore::SipCore()
@@ -31,14 +30,14 @@ void* SipCore::dealTaskThread(void* arg) {
     // 将此线程注册为pjsip管理的线程
     pj_thread_desc desc;
     pjcall_thread_register(desc);
-
     param->base->run(param->data);
+
     delete param;
     param = NULL;
 
     // 入口线程没有回返值,造成未定义行为,如果涉及到多个进行交互会直接触发Trace/breakpoint trap (core dumped)
     // 也就是下级一发来请求,上级进程显示:Trace/breakpoint trap (core dumped)
-    // return NULL;
+    return NULL;
 }
 
 /**
@@ -62,7 +61,6 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
     LOG(INFO) << "request method name:" << msg->line.req.method.name.ptr;
 
     if (msg->line.req.method.id == PJSIP_REGISTER_METHOD) {
-        LOG(ERROR) << "11111111";
         // 如果发送的请求的方法是REGISTER
         param->base = new SipRegister();
     } else if (msg->line.req.method.id == PJSIP_OTHER_METHOD) {
@@ -118,8 +116,7 @@ static pjsip_module recv_mod =
 /**
  *  轮询线程入口回调函数
  */
-static int pollingEvent(void* arg)
-{
+static int pollingEvent(void* arg) {
     LOG(INFO) << "poolling event thread start success";
     pjsip_endpoint* ept = (pjsip_endpoint*)arg;
     while(!(GlobalCtl::gStopPoll)) {

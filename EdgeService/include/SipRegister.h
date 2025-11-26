@@ -5,7 +5,7 @@
 #include "GlobalCtl.h"
 
 /**
- *  下级注册请求业务
+ *  下级注册请求
  */
 class SipRegister {
 private:

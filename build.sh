@@ -17,4 +17,4 @@ fi
 cmake --preset user_preset
 
 
-
+sudo tcpdump -i any -w register.pcapng

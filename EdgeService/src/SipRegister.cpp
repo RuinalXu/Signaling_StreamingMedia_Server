@@ -1,5 +1,6 @@
 #include "SipRegister.h"
 #include <sip/SipMessageHeader.h>
+#include <mutex/AutoMutexLock.h>
 
 SipRegister::SipRegister() {
     m_regTimer = new TaskTimer(3);
@@ -14,6 +15,7 @@ SipRegister::~SipRegister() {
 
 /**
  *  静态函数,但非成员静态函数
+ *  该函数为完成注册后的回调函数
  */
 static void client_cb(struct pjsip_regc_cbparam *param) {
     LOG(INFO) << "code:" << param->code;
@@ -25,16 +27,16 @@ static void client_cb(struct pjsip_regc_cbparam *param) {
 }
 
 /**
- *  设置定时任务的入口函数指针和参数
+ *  定时器回调函数
  */
-void SipRegister::RegisterProc(void* param){
+void SipRegister::RegisterProc(void* param) {
     SipRegister* pthis = (SipRegister*)param;
     // 定义智能锁,并使用全局锁进行初始化
     AutoMutexLock lock(&(GlobalCtl::globalLock));
     GlobalCtl::SUPDOMAININFOLIST::iterator iter = GlobalCtl::instance()->getSupDomainInfoList().begin();
-    for(;iter != GlobalCtl::instance()->getSupDomainInfoList().end(); iter++) {
+    for(; iter != GlobalCtl::instance()->getSupDomainInfoList().end(); iter++) {
         if (!(iter->registered)) {
-            if (pthis->gbRegister(*iter)<0) {
+            if (pthis->gbRegister(*iter) < 0) {
                 LOG(ERROR) << "register error for:" << iter->sipId;
             }
         }
@@ -66,6 +68,10 @@ int SipRegister::gbRegister(GlobalCtl::SupDomainInfo& node) {
     }
     msg.setContact((char*)GBOJ(gConfig)->sipId().c_str(), (char*)GBOJ(gConfig)->sipIp().c_str(), GBOJ(gConfig)->sipPort());
 
+    LOG(ERROR) << "Registering to: " << msg.RequestUrl();
+    LOG(ERROR) << "From: " << msg.FromHeader();
+    LOG(ERROR) << "Contact: " << msg.Contact();
+
     pj_str_t from = pj_str(msg.FromHeader());
     pj_str_t to = pj_str(msg.ToHeader());
     pj_str_t line = pj_str(msg.RequestUrl());
@@ -74,7 +80,7 @@ int SipRegister::gbRegister(GlobalCtl::SupDomainInfo& node) {
     pj_status_t status = PJ_SUCCESS;
     do {
         pjsip_regc* regc;
-        status = pjsip_regc_create(GBOJ(gSipServer)->GetEndPoint(), &node,&client_cb,&regc);
+        status = pjsip_regc_create(GBOJ(gSipServer)->GetEndPoint(), &node, &client_cb, &regc);
         if (PJ_SUCCESS != status) {
             LOG(ERROR) << "pjsip_regc_create error";
             break;
@@ -86,7 +92,7 @@ int SipRegister::gbRegister(GlobalCtl::SupDomainInfo& node) {
             LOG(ERROR) << "pjsip_regc_init error";
             break;
         }
-/*
+
         if (node.isAuth) {
             pjsip_cred_info cred;
             pj_bzero(&cred, sizeof(pjsip_cred_info));
@@ -103,7 +109,7 @@ int SipRegister::gbRegister(GlobalCtl::SupDomainInfo& node) {
                 break;
             }
         }
-*/
+
         pjsip_tx_data* tdata = NULL;
         status = pjsip_regc_register(regc, PJ_TRUE, &tdata);
         if (PJ_SUCCESS != status) {

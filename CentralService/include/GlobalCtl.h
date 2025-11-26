@@ -41,7 +41,7 @@ public:
             auth = false;
         }
         // 运算符重载,
-        bool operator==(string id) {
+        bool operator==(const string& id) const {
             return (this->sipId == id);
         }
         string sipId;

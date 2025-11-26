@@ -9,7 +9,7 @@
 #include <queue>
 
 /**
- *  下级配置
+ *  下级服务的本地配置
  */ 
 class SipLocalConfig {
 private:

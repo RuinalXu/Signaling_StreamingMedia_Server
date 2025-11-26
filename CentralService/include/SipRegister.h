@@ -6,7 +6,7 @@
 #include <sip/SipTaskBase.h>
 
 /**
- *  上级处理注册相关业务
+ *  上级处理对下级的注册相关业务
  */
 class SipRegister : public SipTaskBase {
 private:
