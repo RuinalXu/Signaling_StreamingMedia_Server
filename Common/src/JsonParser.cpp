@@ -7,6 +7,9 @@ JsonParser::JsonParser(string s)
 JsonParser::JsonParser(Json::Value j)
 :m_json(j) {}
 
+/**
+ *  反序列化函数
+ */
 bool JsonParser::toJson(Json::Value& j) {
     bool bret = false;
     Json::CharReaderBuilder builder;
@@ -21,6 +24,9 @@ bool JsonParser::toJson(Json::Value& j) {
     return bret;
 }
 
+/**
+ *  序列化函数: JSON序列化为JSON String
+ */
 string JsonParser::toString() {
     Json::StreamWriterBuilder builder;
     char* indent = "";

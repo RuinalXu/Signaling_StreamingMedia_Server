@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <sip/SipMessageHeader.h>
+#include <sip/SipDef.h>
 #include "GlobalCtl.h"
 
 SipDirectory::SipDirectory(tinyxml2::XMLElement* root) 
@@ -25,7 +26,9 @@ void SipDirectory::run(pjsip_rx_data *rdata)
     int sendCnt = 1;
     while (begin < sum) {
         memset(sendData, 0, BODY_SIZE);
+        // 组织MESSAGE请求中body部分
         constructMANSCDPXml(jsonOut["data"]["nodeInfo"], &begin, sendCnt, sendData, sn);
+        // 组织实际传输的目录信息
         sendSipDirMsg(rdata, sendData);
         usleep(15 * 1000);
     }
@@ -38,15 +41,15 @@ void SipDirectory::constructMANSCDPXml(Json::Value listdata, int* begin, int ite
     parse.insertSubNode(rootNode, (char*)"CmdType", (char*)"Catalog");
     char tmpStr[32] = {0};
     sprintf(tmpStr,"%d",sn);
-    parse.InsertSubNode(rootNode,(char*)"SN",tmpStr);
-    parse.InsertSubNode(rootNode,(char*)"DeviceID",GBOJ(gConfig)->sipId().c_str());
+    parse.insertSubNode(rootNode,(char*)"SN",tmpStr);
+    parse.insertSubNode(rootNode,(char*)"DeviceID",GBOJ(gConfig)->sipId().c_str());
     memset(tmpStr,0,sizeof(tmpStr));
     sprintf(tmpStr,"%d",listdata.size());
-    parse.InsertSubNode(rootNode,(char*)"SumNum",tmpStr);
-    tinyxml2::XMLElement* itemNode = parse.InsertSubNode(rootNode,(char*)"DeviceList",(char*)"");
+    parse.insertSubNode(rootNode,(char*)"SumNum",tmpStr);
+    tinyxml2::XMLElement* itemNode = parse.insertSubNode(rootNode,(char*)"DeviceList",(char*)"");
     memset(tmpStr,0,sizeof(tmpStr));
     sprintf(tmpStr,"%d",itemCount);
-    parse.SetNodeAttributes(itemNode,(char*)"Num",tmpStr);
+    parse.setNodeAttributes(itemNode,(char*)"Num",tmpStr);
     int i = *begin;
     int index = 0;
     for(;i<listdata.size();i++)
@@ -57,50 +60,50 @@ void SipDirectory::constructMANSCDPXml(Json::Value listdata, int* begin, int ite
         }
 
         Json::Value &devNode = listdata[i];
-        tinyxml2::XMLElement* node = parse.InsertSubNode(itemNode,(char*)"item",(char*)"");
-        parse.InsertSubNode(node,(char*)"DeviceID",(char*)devNode["deviceID"].asString().c_str());
-        parse.InsertSubNode(node,(char*)"Name",(char*)devNode["name"].asString().c_str());
+        tinyxml2::XMLElement* node = parse.insertSubNode(itemNode,(char*)"item",(char*)"");
+        parse.insertSubNode(node,(char*)"DeviceID",(char*)devNode["deviceID"].asString().c_str());
+        parse.insertSubNode(node,(char*)"Name",(char*)devNode["name"].asString().c_str());
         //当为设备时  为必选
         if(devNode["manufacturer"] == "")
         {
             devNode["manufacturer"] = "unknow";
         }
-        parse.InsertSubNode(node,(char*)"Manufacturer",(char*)devNode["manufacturer"].asString().c_str());
+        parse.insertSubNode(node,(char*)"Manufacturer",(char*)devNode["manufacturer"].asString().c_str());
         //为设备时  必选  设备型号
         if(devNode["model"] == "")
         {
             devNode["model"] = "unknow";
         }
-        parse.InsertSubNode(node,(char*)"Model",(char*)devNode["model"].asString().c_str());
+        parse.insertSubNode(node,(char*)"Model",(char*)devNode["model"].asString().c_str());
 
-        parse.InsertSubNode(node,(char*)"Owner",(char*)"unknow");
+        parse.insertSubNode(node,(char*)"Owner",(char*)"unknow");
         
         string civilCode = devNode["deviceID"].asString().substr(0,6);
-        parse.InsertSubNode(node,(char*)"CivilCode",(char*)civilCode.c_str());
+        parse.insertSubNode(node,(char*)"CivilCode",(char*)civilCode.c_str());
 
         char info[32] = {0};
         int parental = devNode["parental"].asInt();
         sprintf(info,"%d",parental);
-        parse.InsertSubNode(node,(char*)"Parental",info);
+        parse.insertSubNode(node,(char*)"Parental",info);
 
-        parse.InsertSubNode(node,(char*)"ParentID",(char*)devNode["parentID"].asString().c_str());
+        parse.insertSubNode(node,(char*)"ParentID",(char*)devNode["parentID"].asString().c_str());
         
         int safeway = devNode["safetyWay"].asInt();
         memset(info,0,32);
         sprintf(info,"%d",safeway);
-        parse.InsertSubNode(node,(char*)"SafetyWay",info);
+        parse.insertSubNode(node,(char*)"SafetyWay",info);
 
         int registerway = devNode["registerWay"].asInt();
         memset(info,0,32);
         sprintf(info,"%d",registerway);
-        parse.InsertSubNode(node,(char*)"RegisterWay",info);
+        parse.insertSubNode(node,(char*)"RegisterWay",info);
 
         int secrecy = devNode["secrecy"].asInt();
         memset(info,0,32);
         sprintf(info,"%d",secrecy);
-        parse.InsertSubNode(node,(char*)"Secrecy",info);
+        parse.insertSubNode(node,(char*)"Secrecy",info);
 
-        parse.InsertSubNode(node,(char*)"Status",(char*)devNode["status"].asString().c_str());
+        parse.insertSubNode(node,(char*)"Status",(char*)devNode["status"].asString().c_str());
         
         index++;
     }
@@ -202,12 +205,11 @@ void SipDirectory::directoryQuery(Json::Value& jsonOut)
 {
     std::ifstream file("../../conf/catalog.json");
     std::stringstream buffer;
-    buffer<<file.rdbuf();
+    buffer << file.rdbuf();
     string payload = buffer.str();
 
-    if(JsonParse(payload).toJson(jsonOut) == false)
-    {
-        LOG(ERROR)<<"JsonParse error";
+    if (JsonParser(payload).toJson(jsonOut) == false) {
+        LOG(ERROR) << "JsonParse error";
     }
     return;
 }

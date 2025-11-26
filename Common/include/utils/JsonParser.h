@@ -6,6 +6,9 @@
 
 using namespace std;
 
+/**
+ *  JSON数据的序列化和反序列化
+ */
 class JsonParser {
 private:
     string m_str;

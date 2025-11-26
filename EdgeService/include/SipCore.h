@@ -8,6 +8,25 @@
 #include <pjlib.h>
 #include <pjsip_ua.h>
 
+typedef struct _threadParam {
+    _threadParam() {
+        base = NULL;
+        data = NULL;
+    }
+    ~_threadParam() {
+        if (base) {
+            delete base;
+            base = NULL;
+        }
+        if (data) {
+            pjsip_rx_data_free_cloned(data);
+            data = NULL;
+        }
+    }
+
+    SipTaskBase* base;
+    pjsip_rx_data* data;
+} threadParam;
 
 class SipCore {
 private:
@@ -22,6 +41,8 @@ public:
     bool InitSip(int sipPort);
     pj_status_t init_transport_layer(int sipPort);
     pjsip_endpoint* GetEndPoint() { return m_endpt; }
+
+    static void* dealTaskThread(void* arg);
 };
 
 

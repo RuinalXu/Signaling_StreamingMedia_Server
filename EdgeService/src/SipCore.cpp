@@ -1,4 +1,5 @@
 #include <sip/SipDef.h>
+#include <sip/SipTaskBase.h>
 #include "SipCore.h"
 #include "GlobalCtl.h"
 
@@ -32,7 +33,66 @@ static int pollingEvent(void* arg)
     return 0;
 }
 
+/**
+ *  SipCore的线程入口函数
+ */
+void* SipCore::dealTaskThread(void* arg) {
+    threadParam* param = (threadParam*)arg;
+    if (!param || param->base == NULL) {
+        return NULL;
+    }
+    // 将此线程注册为pjsip管理的线程
+    pj_thread_desc desc;
+    pjcall_thread_register(desc);
+    param->base->run(param->data);
+
+    delete param;
+    param = NULL;
+
+    // 入口线程没有回返值,造成未定义行为,如果涉及到多个进行交互会直接触发Trace/breakpoint trap (core dumped)
+    // 也就是下级一发来请求,上级进程显示:Trace/breakpoint trap (core dumped)
+    return NULL;
+}
+
+/**
+ *  下级请求业务分发
+ */
 pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
+    if (NULL == rdata || NULL == rdata->msg_info.msg) {
+        return PJ_FALSE;
+    }
+    threadParam* param = new threadParam();
+    pjsip_rx_data_clone(rdata,0,&param->data);
+    pjsip_msg* msg = rdata->msg_info.msg;
+    if (msg->line.req.method.id == PJSIP_OTHER_METHOD) {
+        string rootType = "", cmdType = "CmdType", cmdValue;
+        tinyxml2::XMLElement* root = SipTaskBase::parseXmlData(msg,rootType,cmdType,cmdValue);
+        LOG(INFO)<<"rootType:"<<rootType;
+        LOG(INFO)<<"cmdValue:"<<cmdValue;
+        if (rootType == SIP_QUERY) {
+            if (cmdValue == SIP_CATALOG) {
+                param->base = new SipDirectory(root);
+            }
+            else if (cmdValue == SIP_RECORDINFO) {
+                param->base = new SipRecordList();
+            }
+            
+        }
+    }
+    else if (msg->line.req.method.id == PJSIP_INVITE_METHOD || msg->line.req.method.id == PJSIP_BYE_METHOD) {
+        param->base = new SipGbPlay();
+    }
+
+    pthread_t pid;
+    int ret = EC::ECThread::createThread(SipCore::dealTaskThread, param, pid);
+    if (ret != 0) {
+        LOG(ERROR)<<"create task thread error";
+        if (param) {
+            delete param;
+            param = NULL;
+        }
+        return PJ_FALSE;
+    }
     return PJ_SUCCESS;
 }
 

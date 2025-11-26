@@ -6,7 +6,7 @@
 #include <utils/JsonParser.h>
 
 /**
- *  下级发送目录结构以及内容
+ *  下级解析上级发送的XML获取到sn号,并响应目录结构以及内容给上级
  */
 class SipDirectory : public SipTaskBase {
 private:
