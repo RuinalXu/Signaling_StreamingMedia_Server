@@ -1,9 +1,9 @@
 #include <tinyxml2.h>
 #include <thread/ECThread.h>
 #include <sip/SipDef.h>
+#include <sip/SipTaskBase.h>
 #include "SipCore.h"
 #include "GlobalCtl.h"
-#include "SipTaskBase.h"
 #include "SipRegister.h"
 
 
