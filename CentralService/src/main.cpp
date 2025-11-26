@@ -1,9 +1,9 @@
 #include <fmt/base.h>
-// #include "LogManager.h"
+#include <signal.h>
 #include "SipLocalConfig.h"
 #include "GlobalCtl.h"
 #include "SipRegister.h"
-#include <signal.h>
+#include "GetCatalog.h"
 
 /**
  * 	main线程号
@@ -49,6 +49,9 @@ int main(int argc, char* argv[]) {
 	// 上级启动定时检查
 	SipRegister* regc = new SipRegister();
 	regc->registerServiceStart();
+
+	sleep(3);
+	GetCatalog * gbCatalog = new GetCatalog();
 
 	while(true)
 	{

@@ -98,7 +98,8 @@ Aborted (core dumped)
 上级需要在`pj_bool_t onRxRequest(pjsip_rx_data *rdata)`判断下级的方法是**REGISTER**还是**MESSAGE**，如果是**REGISTER**，那么就处理下级的注册业务，如果是**MESSAGE**，判断XML文件的**body**部分
 
 
-# 目录树请求与推送
+# 视频目录树请求与推送
+
 
 # 11月26日遇到的问题
 GlobalCtl::getAuth(parseFromId(msg))在线程中被阻塞了，线程池中线程一直在获取锁，没有释放锁，原因，`AutoMutexLock`自定义自动锁类中的析构函数函数中没有调用释放锁函数；
