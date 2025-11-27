@@ -1,14 +1,15 @@
 #ifndef SIP_LOCAL_CONFIG_H
 #define SIP_LOCAL_CONFIG_H
 
-#include "ConfReader.h"
-#include "Common.h"
+#include <utils/ConfReader.h>
+#include <log/LogManager.h>
+#include <mutex/AutoMutexLock.h>
 #include <list>
 #include <algorithm>
 #include <queue>
 
 /**
- *  下级配置
+ *  下级服务的本地配置
  */ 
 class SipLocalConfig {
 private:

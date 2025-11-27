@@ -7,12 +7,32 @@
 #include <pjsip/sip_auth.h>
 #include <pjlib.h>
 #include <pjsip_ua.h>
-#include <Common.h>
+#include <sip/SipTaskBase.h>
 
+typedef struct _threadParam {
+    _threadParam() {
+        base = NULL;
+        data = NULL;
+    }
+    ~_threadParam() {
+        if (base) {
+            delete base;
+            base = NULL;
+        }
+        if (data) {
+            pjsip_rx_data_free_cloned(data);
+            data = NULL;
+        }
+    }
+
+    SipTaskBase* base;
+    pjsip_rx_data* data;
+} threadParam;
 
 class SipCore {
 private:
     pjsip_endpoint* m_endpt;
+    pjmedia_endpt* m_mediaEndpt;
     pj_caching_pool m_cachingPool;
     pj_pool_t* m_pool;
 public:
@@ -22,6 +42,11 @@ public:
     bool InitSip(int sipPort);
     pj_status_t init_transport_layer(int sipPort);
     pjsip_endpoint* GetEndPoint() { return m_endpt; }
+
+    /**
+     *  多线程处理下级SIP不同请求的回调函数
+     */
+    static void* dealTaskThread(void* arg);
 };
 
 

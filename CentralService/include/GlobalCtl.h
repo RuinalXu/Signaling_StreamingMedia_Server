@@ -6,12 +6,12 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/time.h>
-#include "Common.h"
+#include <algorithm>
+#include <mutex/AutoMutexLock.h>
+#include <thread/ThreadPool.h>
+#include <sip/SipDef.h>
 #include "SipLocalConfig.h"
-#include "ThreadPool.h"
 #include "SipCore.h"
-#include "SipDef.h"
-
 
 class GlobalCtl;
 #define GBOJ(obj) GlobalCtl::instance()->obj
@@ -40,7 +40,8 @@ public:
             lastRegTime = 0;
             auth = false;
         }
-        bool operator==(string id) {
+        // 运算符重载,
+        bool operator==(const string& id) const {
             return (this->sipId == id);
         }
         string sipId;
@@ -49,6 +50,7 @@ public:
         int protocal;
         int registered;
         int expires;
+        // 最后的注册时间
         time_t lastRegTime;
         bool auth;
     } SubDomainInfo;
@@ -83,12 +85,13 @@ public:
     static void free_global_mutex() {
         pthread_mutex_unlock(&globalLock);
     }
-    // static bool checkIsExist(string id);
+    static bool checkIsExist(string id);
+    static void setExpires(string id,int expires);
+    static void setRegister(string id,bool registered);
+    static void setLastRegTime(string id,time_t t);
+    static string randomNum(int length);
+    static bool getAuth(string id);
     // static bool checkIsVaild(string id);
-    // static void setExpires(string id,int expires);
-    // static void setRegister(string id,bool registered);
-    // static void setLastRegTime(string id,time_t t);
-    // static bool getAuth(string id);
 private:
     static GlobalCtl* m_pInstance;
     static SUBDOMAININFOLIST subDomainInfoList;

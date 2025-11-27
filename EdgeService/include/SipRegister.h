@@ -1,9 +1,12 @@
 #ifndef SIP_REGISTER_H
 #define SIP_REGISTER_H
 
+#include <timer/TaskTimer.h>
 #include "GlobalCtl.h"
-#include "TaskTimer.h"
 
+/**
+ *  下级注册请求
+ */
 class SipRegister {
 private:
     /**

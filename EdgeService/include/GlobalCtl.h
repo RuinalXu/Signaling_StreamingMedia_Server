@@ -6,12 +6,11 @@
 #include <sstream>
 #include <unistd.h>
 #include <sys/time.h>
-#include "Common.h"
+#include <log/LogManager.h>
+#include <thread/ThreadPool.h>
+#include <sip/SipDef.h>
 #include "SipLocalConfig.h"
-#include "ThreadPool.h"
 #include "SipCore.h"
-#include "SipDef.h"
-
 
 class GlobalCtl;
 #define GBOJ(obj) GlobalCtl::instance()->obj

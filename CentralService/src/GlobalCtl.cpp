@@ -47,3 +47,89 @@ bool GlobalCtl::init(void* param) {
     return true;
 }
 
+/**
+ *  查询下级节点是否在列表中
+ */
+ bool GlobalCtl::checkIsExist(string id) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    LOG(ERROR) << "id = " << id;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end()) {
+        return true;
+    }
+    return false;
+ }
+
+/**
+ *  设置下级的生存周期
+ */
+ void GlobalCtl::setExpires(string id, int expires) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end()) {
+        it->expires = expires;
+    }
+ }
+
+/**
+ *  判断下级注册时间是否过期
+ */
+void GlobalCtl::setRegister(string id, bool registered) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end()) {
+        it->registered = registered;
+    }
+}
+
+/**
+ *  设置最后注册时间
+ */
+void GlobalCtl::setLastRegTime(string id, time_t t) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end()) {
+        it->lastRegTime = t;
+    }
+}
+
+/**
+ *  获取随机数
+ */
+string GlobalCtl::randomNum(int length) {
+    #if 0
+    //随机数种子
+    random_device rd;
+    //随机数生成器
+    mt19937 gen(rd());
+    //分布器类模板  设定一个0-15的均匀整数分布的区间范围
+    uniform_int_distribution<> dis(0,15);
+    stringstream ss;
+    for(int i =0;i<length;++i)
+    {
+        //每次使用随机数生成器在指定的分布范围内获取一个随机数
+        int value = dis(gen);
+        ss<< std::hex << value;
+    }
+    #endif
+    stringstream ss;
+    for (int i =0;i<length;++i) {   
+        int value = random() % 15;
+        ss<< std::hex << value;
+    }
+    return ss.str();
+}
+
+bool GlobalCtl::getAuth(string id) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end()) {
+        return it->auth;
+    }
+    return false;
+}

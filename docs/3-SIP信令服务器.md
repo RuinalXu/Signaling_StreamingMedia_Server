@@ -1,4 +1,4 @@
-# 第30个视频
+# 第4-9个视频
 # 1 初始化sip信令协议栈并设置信令服务端口
 内存池与内存池工厂
 
@@ -89,3 +89,17 @@ endpoint
 EdgeService: ../src/pj/os_core_unix.c:857: pj_thread_this: Assertion `!"Calling pjlib from unknown/external thread. You must " "register external threads with pj_thread_register() " "before calling any pjlib functions."' failed.
 Aborted (core dumped)
 ```
+
+# 心跳包的业务逻辑
+**心跳包只会在下级注册成功后发送**，会探测上级的服务器运行是否是正常的，上级收到心跳包后，有两种处理逻辑：
+- 只是收到下级的心跳包，证明下级的运行状态是正常的就行，不需要其他处理逻辑；
+- 还有一种逻辑是：收到下级的心跳包后，将下级的注册时间（）进行更新
+
+上级需要在`pj_bool_t onRxRequest(pjsip_rx_data *rdata)`判断下级的方法是**REGISTER**还是**MESSAGE**，如果是**REGISTER**，那么就处理下级的注册业务，如果是**MESSAGE**，判断XML文件的**body**部分
+
+
+# 视频目录树请求与推送
+
+
+# 11月26日遇到的问题
+GlobalCtl::getAuth(parseFromId(msg))在线程中被阻塞了，线程池中线程一直在获取锁，没有释放锁，原因，`AutoMutexLock`自定义自动锁类中的析构函数函数中没有调用释放锁函数；
