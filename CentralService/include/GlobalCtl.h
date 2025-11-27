@@ -72,6 +72,8 @@ public:
      * 全局锁,为了使用智能锁从而将其可见性设置为public
      */
     static pthread_mutex_t globalLock;
+
+    static bool gRcvIpc;
 public:
     static GlobalCtl* instance();
     bool init(void* param);
@@ -91,7 +93,8 @@ public:
     static void setLastRegTime(string id,time_t t);
     static string randomNum(int length);
     static bool getAuth(string id);
-    // static bool checkIsVaild(string id);
+    static bool checkIsVaild(string id);
+    static DevTypeCode getSipDevInfo(string id);
 private:
     static GlobalCtl* m_pInstance;
     static SUBDOMAININFOLIST subDomainInfoList;

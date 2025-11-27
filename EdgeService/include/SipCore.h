@@ -7,6 +7,7 @@
 #include <pjsip/sip_auth.h>
 #include <pjlib.h>
 #include <pjsip_ua.h>
+#include "SipTaskBase.h"
 
 typedef struct _threadParam {
     _threadParam() {

@@ -3,7 +3,7 @@
 
 #include <sip/SipDef.h>
 #include <timer/TaskTimer.h>
-#include <sip/SipTaskBase.h>
+#include "SipTaskBase.h"
 
 /**
  *  上级处理对下级的注册相关业务

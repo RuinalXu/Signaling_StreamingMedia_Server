@@ -1,10 +1,11 @@
 #include <tinyxml2.h>
 #include <thread/ECThread.h>
 #include <sip/SipDef.h>
-#include <sip/SipTaskBase.h>
+#include "SipTaskBase.h"
 #include "SipCore.h"
 #include "GlobalCtl.h"
 #include "SipRegister.h"
+#include "SipGbPlay.h"
 
 using namespace EC;
 
@@ -197,23 +198,23 @@ bool SipCore::InitSip(int sipPort) {
             LOG(ERROR) << "register recv_mod faild,code:" << status;
             break;
         }
-/*
+
         // 添加对INVITE事件的回调的初始化
         pjsip_inv_callback inv_cb;
-        pj_bzero(&inv_cb,  sizeof(inv_cb));
-        inv_cb.on_state_changed = NULL;
-        inv_cb.on_new_session = NULL;
-        inv_cb.on_media_update = NULL;
-        inv_cb.on_send_ack = NULL;
+        pj_bzero(&inv_cb, sizeof(inv_cb));
+        inv_cb.on_state_changed = &SipGbPlay::onStateChanged;
+        inv_cb.on_new_session = &SipGbPlay::onNewSession;
+        inv_cb.on_media_update = &SipGbPlay::onMediaUpdate;
+        // inv_cb.on_send_ack = &SipGbPlay::onSendAck;
         // 将INVITE事件的回调函数注册到endpoint对象中
         status = pjsip_inv_usage_init(m_endpt,&inv_cb);
         if (PJ_SUCCESS != status) {
             LOG(ERROR)<<"register invite module faild,code:"<<status;
             break;
         }
-*/
+
         // 给endpoint分配内存池后,endpoint才能对其他模块进行内存分配管理
-        // de用于处理网络媒体数据的收发，以及流的传输的功能
+        // 用于处理网络媒体数据的收发，以及流的传输的功能
         m_pool = pjsip_endpt_create_pool(m_endpt, NULL, SIP_ALLOC_POOL_1M, SIP_ALLOC_POOL_1M);
         if (NULL == m_pool) {
             LOG(ERROR)<<"create pool faild";

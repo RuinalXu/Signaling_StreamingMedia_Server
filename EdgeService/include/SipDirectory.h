@@ -1,7 +1,7 @@
 #ifndef SIP_DIRECTORY_H
 #define SIP_DIRECTORY_H
 
-#include <sip/SipTaskBase.h>
+#include "SipTaskBase.h"
 #include <utils/XmlParser.h>
 #include <utils/JsonParser.h>
 

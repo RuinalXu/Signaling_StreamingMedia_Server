@@ -1,9 +1,11 @@
 #include "GlobalCtl.h"
+#include <sip/SipDef.h>
 
 GlobalCtl* GlobalCtl::m_pInstance = NULL;
 GlobalCtl::SUBDOMAININFOLIST GlobalCtl::subDomainInfoList;
 pthread_mutex_t GlobalCtl::globalLock = PTHREAD_MUTEX_INITIALIZER;
 bool GlobalCtl::gStopPoll = false;
+bool GlobalCtl::gRcvIpc = false;
 
 GlobalCtl* GlobalCtl::instance() {
     if (!m_pInstance) {
@@ -132,4 +134,33 @@ bool GlobalCtl::getAuth(string id) {
         return it->auth;
     }
     return false;
+}
+
+bool GlobalCtl::checkIsVaild(string id) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end() && it->registered) {
+        return true;
+    }
+    return false;
+}
+
+DevTypeCode GlobalCtl::getSipDevInfo(string id) {
+    DevTypeCode code_type = Error_code;
+    string tmp = id.substr(10, 3);
+    int type = atoi(tmp.c_str());
+
+    switch(type) {
+        case Camera_Code:
+            code_type = Camera_Code;
+            break;
+        case Ipc_Code:
+            code_type = Ipc_Code;
+            break;   
+        default:
+            code_type = Error_code;
+            break;
+    }
+    return code_type;
 }

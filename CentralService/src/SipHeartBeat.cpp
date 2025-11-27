@@ -1,5 +1,4 @@
 #include "SipHeartBeat.h"
-#include "sip/SipTaskBase.h"
 #include <sys/time.h>
 #include <sys/sysinfo.h>
 #include <sip/SipInclude.h>
