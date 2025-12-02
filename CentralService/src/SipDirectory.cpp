@@ -47,13 +47,14 @@ void SipDirectory::SaveDir(int& status_code)
     }
     
     pElement = pRootElement->FirstChildElement("SumNum");
-    if(pElement && pElement->GetText())
+    if(pElement && pElement->GetText()) {
         strSumNum = pElement->GetText();
+    }
 
     pElement = pRootElement->FirstChildElement("SN");
-    if(pElement && pElement->GetText())
+    if(pElement && pElement->GetText()) {
         strSn = pElement->GetText();
-
+    }
 
     pElement = pRootElement->FirstChildElement("DeviceList");
     if(pElement)
@@ -113,7 +114,7 @@ void SipDirectory::SaveDir(int& status_code)
             pChild = pItem->FirstChildElement("RegisterWay");
             if(pChild && pChild->GetText()) {
                 strRegisterWay = pChild->GetText();
-            
+            }
             pChild = pItem->FirstChildElement("Secrecy");
             if(pChild && pChild->GetText()) {
                 strSecrecy = pChild->GetText();

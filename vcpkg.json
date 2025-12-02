@@ -5,9 +5,9 @@
     "glog",
     "jsoncpp",
     "libevent",
+    "libsrtp",
     "spdlog",
     "tinyxml2",
-    "yaml-cpp",
-    "libsrtp"
+    "yaml-cpp"
   ]
 }

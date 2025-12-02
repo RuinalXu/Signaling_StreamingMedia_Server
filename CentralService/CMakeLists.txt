@@ -20,6 +20,12 @@ set(PJSIP_ROOT "../third_party/pjproject/pjsip")
 set(PJLIB_UTIL_ROOT "../third_party/pjproject/pjlib-util")
 set(PJMEDIA_ROOT "../third_party/pjproject/pjmedia")
 set(PJNATH_ROOT "../third_party/pjproject/pjnath")
+# 设置jthread相关路径
+set(JTHREAD_ROOT "../third_party/jthread")
+# 设置jrtplib相关路径
+set(JRTPLIB_ROOT "../third_party/jrtplib")
+# 设置ffmpeg相关路径
+set(FFMPEG_ROOT "../third_party/ffmpeg")
 
 
 # 添加项目头文件
@@ -30,6 +36,12 @@ target_include_directories(${EXE_NAME} PRIVATE ${PJSIP_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJLIB_UTIL_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJMEDIA_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJNATH_ROOT}/include)
+# 添加jthread第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${JTHREAD_ROOT}/src)
+# 添加jrtplib第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${JRTPLIB_ROOT}/src)
+# 添加ffmpeg第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${FFMPEG_ROOT}/include)
 
 # 编辑时定义宏,指定字节序
 target_compile_definitions(${EXE_NAME} PRIVATE PJ_IS_LITTLE_ENDIAN=1)
@@ -56,6 +68,18 @@ find_library(PJMEDIA_SDP pjsdp-aarch64-unknown-linux-gnu PATHS ${PJMEDIA_ROOT}/l
 find_library(PJMEDIA_CODEC pjmedia-codec-aarch64-unknown-linux-gnu PATHS ${PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 # pjnath相关链接库
 find_library(PJNATH_LIB pjnath-aarch64-unknown-linux-gnu PATHS ${PJNATH_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+# jthread相关链接库
+find_library(JTHREAD_LIB jthread PATHS ${JTHREAD_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
+# jrtplib相关链接库
+find_library(JRTPLIB_LIB jrtp PATHS ${JRTPLIB_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
+# ffmpeg相关链接库
+find_library(AVCODEC_LIB    avcodec    PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVFORMAT_LIB   avformat   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVUTIL_LIB     avutil     PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVFILTER_LIB   avfilter   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVDEVICE_LIB   avdevice   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SWRESAMPLE_LIB swresample PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SWSCALE_LIB    swscale    PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(glog CONFIG REQUIRED)
@@ -65,6 +89,7 @@ find_package(tinyxml2 CONFIG REQUIRED)
 find_package(Libevent CONFIG REQUIRED)
 find_package(libSRTP CONFIG REQUIRED)
 
+# 链接第三方库
 target_link_libraries(${EXE_NAME} PRIVATE
     fmt::fmt
     glog::glog
@@ -74,6 +99,7 @@ target_link_libraries(${EXE_NAME} PRIVATE
     libevent::extra
     libevent::pthreads
 )
+# target_link_libraries(${EXE_NAME} PRIVATE)
 
 target_link_libraries(${EXE_NAME} PRIVATE
     # 高层应用逻辑
@@ -98,6 +124,22 @@ target_link_libraries(${EXE_NAME} PRIVATE
 
     libSRTP::srtp2
 )
+
+target_link_libraries(${EXE_NAME} PRIVATE
+    ${JRTPLIB_LIB}
+    ${JTHREAD_LIB}
+)
+
+target_link_libraries(${EXE_NAME} PRIVATE
+    ${AVDEVICE_LIB}
+    ${AVFILTER_LIB}
+    ${AVFORMAT_LIB}
+    ${AVCODEC_LIB}
+    ${SWRESAMPLE_LIB}
+    ${SWSCALE_LIB}
+    ${AVUTIL_LIB}
+)
+
 
 # 引入自定义静态库
 target_link_libraries(${EXE_NAME} PRIVATE Common)
