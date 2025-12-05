@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "ffmpeg",
     "fmt",
     "gflags",
     "glog",
@@ -8,6 +9,7 @@
     "libsrtp",
     "spdlog",
     "tinyxml2",
-    "yaml-cpp"
+    "yaml-cpp",
+    "zlmediakit"
   ]
 }

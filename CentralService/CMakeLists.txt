@@ -24,11 +24,8 @@ set(PJNATH_ROOT "../third_party/pjproject/pjnath")
 set(JTHREAD_ROOT "../third_party/jthread")
 # 设置jrtplib相关路径
 set(JRTPLIB_ROOT "../third_party/jrtplib")
-# 设置ffmpeg相关路径
-set(FFMPEG_ROOT "../third_party/ffmpeg")
 # 设置media_server相关路径
 set(MEDIA_SERVER_ROOT "../third_party/media_server")
-
 
 # 添加项目头文件
 target_include_directories(${EXE_NAME} PRIVATE ./include)
@@ -42,8 +39,6 @@ target_include_directories(${EXE_NAME} PRIVATE ${PJNATH_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${JTHREAD_ROOT}/src)
 # 添加jrtplib第三方库头文件
 target_include_directories(${EXE_NAME} PRIVATE ${JRTPLIB_ROOT}/src)
-# 添加ffmpeg第三方库头文件
-target_include_directories(${EXE_NAME} PRIVATE ${FFMPEG_ROOT}/include)
 # 添加media_server的mpeg第三方库头文件
 target_include_directories(${EXE_NAME} PRIVATE ${MEDIA_SERVER_ROOT}/libmpeg/include)
 
@@ -76,14 +71,6 @@ find_library(PJNATH_LIB pjnath-aarch64-unknown-linux-gnu PATHS ${PJNATH_ROOT}/li
 find_library(JTHREAD_LIB jthread PATHS ${JTHREAD_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
 # jrtplib相关链接库
 find_library(JRTPLIB_LIB jrtp PATHS ${JRTPLIB_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
-# ffmpeg相关链接库
-find_library(AVCODEC_LIB    avcodec    PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(AVFORMAT_LIB   avformat   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(AVUTIL_LIB     avutil     PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(AVFILTER_LIB   avfilter   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(AVDEVICE_LIB   avdevice   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SWRESAMPLE_LIB swresample PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
-find_library(SWSCALE_LIB    swscale    PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 # media_server相关链接库
 find_library(MEDIA_SERVER_MPEG_LIB mpeg PATHS ${MEDIA_SERVER_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
@@ -94,6 +81,22 @@ find_package(jsoncpp CONFIG REQUIRED)
 find_package(tinyxml2 CONFIG REQUIRED)
 find_package(Libevent CONFIG REQUIRED)
 find_package(libSRTP CONFIG REQUIRED)
+
+# 使用pck-config对ffmpeg库进行链接
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFMPEG REQUIRED
+    libavcodec
+    libavdevice
+    libavfilter
+    libavformat
+    libavutil
+    libswresample
+    libswscale
+)
+target_include_directories(${EXE_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(${EXE_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
+target_link_libraries(${EXE_NAME} PRIVATE ${FFMPEG_LIBRARIES})
+
 
 # 链接第三方库
 target_link_libraries(${EXE_NAME} PRIVATE
@@ -137,16 +140,6 @@ target_link_libraries(${EXE_NAME} PRIVATE
 
 target_link_libraries(${EXE_NAME} PRIVATE
     ${MEDIA_SERVER_MPEG_LIB}
-)
-
-target_link_libraries(${EXE_NAME} PRIVATE
-    ${AVDEVICE_LIB}
-    ${AVFILTER_LIB}
-    ${AVFORMAT_LIB}
-    ${AVCODEC_LIB}
-    ${SWRESAMPLE_LIB}
-    ${SWSCALE_LIB}
-    ${AVUTIL_LIB}
 )
 
 # 引入自定义静态库
