@@ -17,6 +17,35 @@ class GlobalCtl;
 #define GBOJ(obj) GlobalCtl::instance()->obj
 
 /**
+ *  自定义RTSP会话对象
+ */
+class Session {
+public:
+    string devid;
+    string platformId;
+    string streamName;
+    string setupType;
+    int protocal;
+    int startTime;
+    int endTime;
+    timeval m_curTime;
+    int rtp_loaclport;
+public:
+    Session(const DeviceInfo& devInfo) {
+        devid = devInfo.devid;
+        platformId = devInfo.playformId;
+        streamName = devInfo.streamName;
+        setupType = devInfo.setupType;
+        protocal = devInfo.protocal;
+        startTime = devInfo.startTime;
+        endTime = devInfo.endTime;
+        gettimeofday(&m_curTime,NULL);
+        rtp_loaclport = 0;
+    }
+    virtual ~Session() {}
+};
+
+/**
  *  pjlib的线程注册
  */
 static pj_status_t pjcall_thread_register(pj_thread_desc& desc) {

@@ -29,6 +29,14 @@ target_include_directories(${EXE_NAME} PRIVATE ${PJSIP_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJLIB_UTIL_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJMEDIA_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJNATH_ROOT}/include)
+# 添加jthread第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${JTHREAD_ROOT}/src)
+# 添加jrtplib第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${JRTPLIB_ROOT}/src)
+# 添加ffmpeg第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${FFMPEG_ROOT}/include)
+# 添加media_server的mpeg第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${MEDIA_SERVER_ROOT}/libmpeg/include)
 
 # 编辑时定义宏,指定字节序
 target_compile_definitions(${EXE_NAME} PRIVATE PJ_IS_LITTLE_ENDIAN=1)
@@ -56,6 +64,20 @@ find_library(PJMEDIA_SDP pjsdp-aarch64-unknown-linux-gnu PATHS ${PJMEDIA_ROOT}/l
 find_library(PJMEDIA_CODEC pjmedia-codec-aarch64-unknown-linux-gnu PATHS ${PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 # pjnath相关链接库
 find_library(PJNATH_LIB pjnath-aarch64-unknown-linux-gnu PATHS ${PJNATH_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+# jthread相关链接库
+find_library(JTHREAD_LIB jthread PATHS ${JTHREAD_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
+# jrtplib相关链接库
+find_library(JRTPLIB_LIB jrtp PATHS ${JRTPLIB_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
+# ffmpeg相关链接库
+find_library(AVCODEC_LIB    avcodec    PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVFORMAT_LIB   avformat   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVUTIL_LIB     avutil     PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVFILTER_LIB   avfilter   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(AVDEVICE_LIB   avdevice   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SWRESAMPLE_LIB swresample PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+find_library(SWSCALE_LIB    swscale    PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+# media_server相关链接库
+find_library(MEDIA_SERVER_MPEG_LIB mpeg PATHS ${MEDIA_SERVER_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(glog CONFIG REQUIRED)
@@ -97,6 +119,20 @@ target_link_libraries(${EXE_NAME} PRIVATE
     ${PJLIB_LIB}
 
     libSRTP::srtp2
+)
+
+target_link_libraries(${EXE_NAME} PRIVATE
+    ${MEDIA_SERVER_MPEG_LIB}
+)
+
+target_link_libraries(${EXE_NAME} PRIVATE
+    ${AVDEVICE_LIB}
+    ${AVFILTER_LIB}
+    ${AVFORMAT_LIB}
+    ${AVCODEC_LIB}
+    ${SWRESAMPLE_LIB}
+    ${SWSCALE_LIB}
+    ${AVUTIL_LIB}
 )
 
 # 引入自定义静态库

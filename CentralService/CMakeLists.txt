@@ -26,6 +26,8 @@ set(JTHREAD_ROOT "../third_party/jthread")
 set(JRTPLIB_ROOT "../third_party/jrtplib")
 # 设置ffmpeg相关路径
 set(FFMPEG_ROOT "../third_party/ffmpeg")
+# 设置media_server相关路径
+set(MEDIA_SERVER_ROOT "../third_party/media_server")
 
 
 # 添加项目头文件
@@ -42,6 +44,8 @@ target_include_directories(${EXE_NAME} PRIVATE ${JTHREAD_ROOT}/src)
 target_include_directories(${EXE_NAME} PRIVATE ${JRTPLIB_ROOT}/src)
 # 添加ffmpeg第三方库头文件
 target_include_directories(${EXE_NAME} PRIVATE ${FFMPEG_ROOT}/include)
+# 添加media_server的mpeg第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${MEDIA_SERVER_ROOT}/libmpeg/include)
 
 # 编辑时定义宏,指定字节序
 target_compile_definitions(${EXE_NAME} PRIVATE PJ_IS_LITTLE_ENDIAN=1)
@@ -80,6 +84,8 @@ find_library(AVFILTER_LIB   avfilter   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH 
 find_library(AVDEVICE_LIB   avdevice   PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(SWRESAMPLE_LIB swresample PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 find_library(SWSCALE_LIB    swscale    PATHS ${FFMPEG_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+# media_server相关链接库
+find_library(MEDIA_SERVER_MPEG_LIB mpeg PATHS ${MEDIA_SERVER_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(glog CONFIG REQUIRED)
@@ -99,7 +105,6 @@ target_link_libraries(${EXE_NAME} PRIVATE
     libevent::extra
     libevent::pthreads
 )
-# target_link_libraries(${EXE_NAME} PRIVATE)
 
 target_link_libraries(${EXE_NAME} PRIVATE
     # 高层应用逻辑
@@ -131,6 +136,10 @@ target_link_libraries(${EXE_NAME} PRIVATE
 )
 
 target_link_libraries(${EXE_NAME} PRIVATE
+    ${MEDIA_SERVER_MPEG_LIB}
+)
+
+target_link_libraries(${EXE_NAME} PRIVATE
     ${AVDEVICE_LIB}
     ${AVFILTER_LIB}
     ${AVFORMAT_LIB}
@@ -139,7 +148,6 @@ target_link_libraries(${EXE_NAME} PRIVATE
     ${SWSCALE_LIB}
     ${AVUTIL_LIB}
 )
-
 
 # 引入自定义静态库
 target_link_libraries(${EXE_NAME} PRIVATE Common)

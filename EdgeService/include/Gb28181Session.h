@@ -27,9 +27,9 @@ extern "C" {
 using namespace jrtplib;
 
 /**
- *  RTP会话控制
+ *  下级RTP会话控制
  */
-class Gb28181Session : public RTPSession, public Session {
+class Gb28181Session : public RTPSession {
 
 protected:
     void OnNewSource(RTPSourceData* srcdat);

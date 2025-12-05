@@ -1,5 +1,6 @@
 #include "OpenStream.h"
 #include <sip/SipInclude.h>
+#include "Gb28181Session.h"
 
 OpenStream::OpenStream() {
     m_pStreamTimer = new TaskTimer(600);
@@ -25,5 +26,8 @@ void OpenStream::StreamGetProc(void* param) {
     
 
     // SDP
+    
+    /* 引用GbSeession */
+    Gb28181Session* session = new Gb28181Session();
     
 }

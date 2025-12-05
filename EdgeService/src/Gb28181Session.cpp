@@ -88,8 +88,3 @@ int Gb28181Session::createRtpSession(string dstip, int dstport) {
 
     return ret;
 }
-
-
-// PS流的解封装（就是音视频数据的解码）
-
-// 还需要定义一个回调，用来接收PS流解封装后的裸流数据
