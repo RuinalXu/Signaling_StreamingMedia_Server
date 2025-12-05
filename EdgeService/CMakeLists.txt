@@ -20,7 +20,6 @@ set(PJSIP_ROOT "../third_party/pjproject/pjsip")
 set(PJLIB_UTIL_ROOT "../third_party/pjproject/pjlib-util")
 set(PJMEDIA_ROOT "../third_party/pjproject/pjmedia")
 set(PJNATH_ROOT "../third_party/pjproject/pjnath")
-# set(FFMPEG_ROOT "../third_party/ffmpeg")
 
 # 添加项目头文件
 target_include_directories(${EXE_NAME} PRIVATE ./include)

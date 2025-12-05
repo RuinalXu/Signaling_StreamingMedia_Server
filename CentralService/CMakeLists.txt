@@ -97,7 +97,6 @@ target_include_directories(${EXE_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
 target_link_directories(${EXE_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
 target_link_libraries(${EXE_NAME} PRIVATE ${FFMPEG_LIBRARIES})
 
-
 # 链接第三方库
 target_link_libraries(${EXE_NAME} PRIVATE
     fmt::fmt
