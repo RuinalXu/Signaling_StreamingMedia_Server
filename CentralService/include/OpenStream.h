@@ -5,7 +5,7 @@
 #include <string>
 
 /**
- *  上级发送INVITE请求,进行开流
+ *  上级发送INVITE请求,基上级主动向下级进行开流
  */
 class OpenStream {
 private:

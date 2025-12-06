@@ -53,3 +53,23 @@ bool GlobalCtl::init(void* param) {
     return true;
 }
 
+DevTypeCode GlobalCtl::getSipDevInfo(string id) {
+    DevTypeCode code_type = Error_code;
+    string tmp = id.substr(10, 3);
+    // atio()标准库函数: 字符串转int值
+    int type = atoi(tmp.c_str());
+
+    switch(type) {
+        case Camera_Code:
+            code_type = Camera_Code;
+            break;
+        case Ipc_Code:
+            code_type = Ipc_Code;
+            break;   
+        default:
+            code_type = Error_code;
+            break;
+    }
+    return code_type;
+}
+

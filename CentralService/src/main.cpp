@@ -4,6 +4,7 @@
 #include "GlobalCtl.h"
 #include "SipRegister.h"
 #include "GetCatalog.h"
+#include "OpenStream.h"
 
 /**
  * 	main线程号
@@ -51,13 +52,15 @@ int main(int argc, char* argv[]) {
 	regc->registerServiceStart();
 
 	sleep(3);
-	GetCatalog * gbCatalog = new GetCatalog();
+	GetCatalog dirct;
 
-	while(true)
-	{
+	// 上级对下级进行开流请求
+	OpenStream::StreamGetProc(NULL);
+	OpenStream* gbStream = new OpenStream();
+	gbStream->StreamServiceStart();
+	
+	while(true) {
 		sleep(30);
 	}
-
-    
     return 0;
 }

@@ -80,7 +80,7 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
                 param->base = new SipDirectory(root);
             }
             else if (cmdValue == SIP_RECORDINFO) {
-                param->base = new SipRecordList(root);
+                // param->base = new SipRecordList(root);
             }
         }
     }
@@ -133,6 +133,9 @@ static int pollingEvent(void* arg) {
     return 0;
 }
 
+/**
+ *  pjsip相关核心组件初始化
+ */
 bool SipCore::InitSip(int sipPort) {
     pj_status_t status;
     
@@ -201,11 +204,13 @@ bool SipCore::InitSip(int sipPort) {
             break;
         }
 
-        // 添加对INVITE事件的回调的初始化
+        /* 添加对INVITE事件的回调的初始化 */
         pjsip_inv_callback inv_cb;
         pj_bzero(&inv_cb, sizeof(inv_cb));
+        // 请求的会话状态发生变更时调用该回调
         inv_cb.on_state_changed = &SipGbPlay::onStateChanged;
         inv_cb.on_new_session = &SipGbPlay::onNewSession;
+        // 处理流媒体相关的事物的回调
         inv_cb.on_media_update = &SipGbPlay::onMediaUpdate;
         // inv_cb.on_send_ack = &SipGbPlay::onSendAck;
         // 将INVITE事件的回调函数注册到endpoint对象中
