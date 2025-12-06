@@ -37,6 +37,9 @@ tinyxml2::XMLElement* XmlParser::insertSubNode(tinyxml2::XMLElement* parentNode,
     return insertNode;
 }
 
+/**
+ *  设置当前节点的键值属性
+ */
 void XmlParser::setNodeAttributes(tinyxml2::XMLElement* node, char* attrName, char* attrValue) {
     if (!node) {
         return;

@@ -16,6 +16,10 @@ using namespace std;
 #define SIP_RESPONSE    "Response"
 #define SIP_CATALOG     "Catalog"
 #define SIP_RECORDINFO  "RecordInfo"
+#define SIP_QUERY       "Query"
+#define SIP_RECORDINFO  "RecordInfo"
+
+
 
 // 
 #define BODY_SIZE 1024 * 10

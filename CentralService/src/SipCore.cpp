@@ -5,6 +5,8 @@
 #include "SipCore.h"
 #include "GlobalCtl.h"
 #include "SipRegister.h"
+#include "SipDirectory.h"
+#include "SipHeartBeat.h"
 #include "SipGbPlay.h"
 
 using namespace EC;
@@ -42,7 +44,7 @@ void* SipCore::dealTaskThread(void* arg) {
 }
 
 /**
- *  利用多态在此回调函数中实现不同事件的业务逻辑
+ *  利用多态在此回调函数中实现不同事件的业务逻辑,任务分发
  */
 pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
     LOG(INFO) << "request msg coming ...";
@@ -70,17 +72,17 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
         tinyxml2::XMLElement* root = SipTaskBase::parseXmlData(msg, rootType, cmdType, cmdValue);
         LOG(INFO) << "rootType:" << rootType;
         LOG(INFO) << "cmdValue:" << cmdValue;
-        // if (rootType == SIP_NOTIFY && cmdValue == SIP_HEARTBEAT) {
-        //     param->base = new SipHeartBeat();
-        // }
-        // else if (rootType == SIP_RESPONSE) {
-        //     if (cmdValue == SIP_CATALOG) {
-        //         param->base = new SipDirectory(root);
-        //     }
-        //     else if (cmdValue == SIP_RECORDINFO) {
-        //         param->base = new SipRecordList(root);
-        //     }
-        // }
+        if (rootType == SIP_NOTIFY && cmdValue == SIP_HEARTBEAT) {
+            param->base = new SipHeartBeat();
+        }
+        else if (rootType == SIP_RESPONSE) {
+            if (cmdValue == SIP_CATALOG) {
+                param->base = new SipDirectory(root);
+            }
+            else if (cmdValue == SIP_RECORDINFO) {
+                param->base = new SipRecordList(root);
+            }
+        }
     }
 
     // 创建线程

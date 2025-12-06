@@ -12,11 +12,30 @@ SipDirectory::SipDirectory(tinyxml2::XMLElement* root)
 
 SipDirectory::~SipDirectory() {}
 
+/**
+ *  下级处理上级请求的接口
+ */
 void SipDirectory::run(pjsip_rx_data *rdata)
 {
+    // 解析上级发送的rdata,若没有问题先响应上级,再推送目录树
+
+    // 目录树
+    // 下级服务器为上级推送目录资源,数据的来源为数据库,数据库的数据为下级的客户端,
+    // 那么这个连接下级服务的客户端就是提供数据库的CRUD业务,所以需要新增一个模块,实现数据库相关的业务
+    // 并提供一个接口
+    // 如何实现：使用libcul中的http/https去请求golang的接口，返回数据库中共享目录表中的数据
+    // 以上为实际开发过程,但是在本项目中,我们是直接读取json文件
+    // 把这个读取到的json数据作为查询到的目录树数据
+
+    // 这里涉及到一个概念：网络数据传输/数据透传尽量选择json数据
+
+    // 为了防止目录树解析失败,尽量将目录树数据XML中的Item字段一次完成发送,不要对Item字段进行拆分
+    // 这是在实际过程中得到的经验
+
+
 	LOG(INFO) << "SipDirectory::run";
     int sn = -1;
-    resDir(rdata,&sn);
+    resDir(rdata, &sn);
     Json::Value jsonOut;
     directoryQuery(jsonOut);
 
@@ -35,6 +54,70 @@ void SipDirectory::run(pjsip_rx_data *rdata)
     return;
 }
 
+/**
+ *  推送目录树.
+ */
+void SipDirectory::resDir(pjsip_rx_data *rdata, int* sn)
+{
+    int status_code = 200;
+
+    do
+    {
+        tinyxml2::XMLElement* pRootElement = m_pRootElement;
+        if(!pRootElement)
+        {
+            status_code = 400;
+            break;
+        }
+
+        string devid, strSn;
+        tinyxml2::XMLElement* pElement = pRootElement->FirstChildElement("DeviceID");
+        if(pElement && pElement->GetText()){
+            devid = pElement->GetText();
+        }
+        
+        if(devid != GBOJ(gConfig)->sipId())
+        {
+            status_code = 400;
+            break;
+        }
+
+        pElement = pRootElement->FirstChildElement("SN");
+        if(pElement) {
+            strSn = pElement->GetText();
+        }
+        *sn = atoi(strSn.c_str());
+
+    }while(0);
+
+    // 响应上级
+    pj_status_t status = pjsip_endpt_respond(GBOJ(gSipServer)->GetEndPoint(), NULL, rdata, status_code, NULL, NULL, NULL, NULL);
+    if(PJ_SUCCESS != status)
+    {
+        LOG(ERROR)<<"pjsip_endpt_respond error";
+    }
+    return;
+
+}
+
+/**
+ *  模拟下级服务的客户端的目录树查询
+ *  这里使用本地文件替代,实际开发过程中,是通过数据库查询到的
+ */
+void SipDirectory::directoryQuery(Json::Value& jsonOut) {
+    std::ifstream file("../../conf/catalog.json");
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    string payload = buffer.str();
+    if (JsonParser(payload).toJson(jsonOut) == false) {
+        LOG(ERROR) << "JsonParse error";
+    }
+    return;
+}
+
+/**
+ *  组织Message Body中的XML目录树
+ */
 void SipDirectory::constructMANSCDPXml(Json::Value listdata, int* begin, int itemCount, char* sendData, int sn) {
     XmlParser parse;
     tinyxml2::XMLElement* rootNode = parse.addRootNode((char*)"Response");
@@ -59,17 +142,18 @@ void SipDirectory::constructMANSCDPXml(Json::Value listdata, int* begin, int ite
             break;
         }
 
+        // 组织目录树XML文件中的Item部分
         Json::Value &devNode = listdata[i];
         tinyxml2::XMLElement* node = parse.insertSubNode(itemNode,(char*)"item",(char*)"");
         parse.insertSubNode(node,(char*)"DeviceID",(char*)devNode["deviceID"].asString().c_str());
         parse.insertSubNode(node,(char*)"Name",(char*)devNode["name"].asString().c_str());
-        //当为设备时  为必选
+        // 当为设备时  为必选
         if(devNode["manufacturer"] == "")
         {
             devNode["manufacturer"] = "unknow";
         }
         parse.insertSubNode(node,(char*)"Manufacturer",(char*)devNode["manufacturer"].asString().c_str());
-        //为设备时  必选  设备型号
+        // 为设备时  必选  设备型号
         if(devNode["model"] == "")
         {
             devNode["model"] = "unknow";
@@ -112,9 +196,11 @@ void SipDirectory::constructMANSCDPXml(Json::Value listdata, int* begin, int ite
     return;
 }
 
-void SipDirectory::sendSipDirMsg(pjsip_rx_data *rdata,char* sendData)
-{
-    LOG(INFO)<<sendData;
+/**
+ *  组织SIP的Message部分,包括Request Line/Message Header/Message Body部分.
+ */
+void SipDirectory::sendSipDirMsg(pjsip_rx_data *rdata,char* sendData) {
+    LOG(INFO) << sendData;
     pjsip_msg* msg = rdata->msg_info.msg;
     string fromId = parseFromId(msg);
     SipMessage sipMsg;
@@ -138,9 +224,9 @@ void SipDirectory::sendSipDirMsg(pjsip_rx_data *rdata,char* sendData)
     pj_str_t to = pj_str(sipMsg.ToHeader());
     pj_str_t line = pj_str(sipMsg.RequestUrl());
     string method = "MESSAGE";
-    pjsip_method reqMethod = {PJSIP_OTHER_METHOD,{(char*)method.c_str(),method.length()}};
+    pjsip_method reqMethod = {PJSIP_OTHER_METHOD, {(char*)method.c_str(), method.length()}};
     pjsip_tx_data* tdata;
-    pj_status_t status = pjsip_endpt_create_request(GBOJ(gSipServer)->GetEndPoint(),&reqMethod,&line,&from,&to,NULL,NULL,-1,NULL,&tdata);
+    pj_status_t status = pjsip_endpt_create_request(GBOJ(gSipServer)->GetEndPoint(), &reqMethod, &line, &from, &to,NULL,NULL,-1,NULL,&tdata);
     if(PJ_SUCCESS != status)
     {
         LOG(ERROR)<<"pjsip_endpt_create_request ERROR";
@@ -157,59 +243,6 @@ void SipDirectory::sendSipDirMsg(pjsip_rx_data *rdata,char* sendData)
     {
         LOG(ERROR)<<"pjsip_endpt_send_request ERROR";
         return;
-    }
-    return;
-}
-
-void SipDirectory::resDir(pjsip_rx_data *rdata,int* sn)
-{
-    int status_code = 200;
-
-    do
-    {
-        tinyxml2::XMLElement* pRootElement = m_pRootElement;
-        if(!pRootElement)
-        {
-            status_code = 400;
-            break;
-        }
-
-        string devid,strSn;
-        tinyxml2::XMLElement* pElement = pRootElement->FirstChildElement("DeviceID");
-        if(pElement && pElement->GetText())
-            devid = pElement->GetText();
-        
-        if(devid != GBOJ(gConfig)->sipId())
-        {
-            status_code = 400;
-            break;
-        }
-
-        pElement = pRootElement->FirstChildElement("SN");
-        if(pElement)
-            strSn = pElement->GetText();
-        *sn = atoi(strSn.c_str());
-
-    }while(0);
-
-    pj_status_t status = pjsip_endpt_respond(GBOJ(gSipServer)->GetEndPoint(),NULL,rdata,status_code,NULL,NULL,NULL,NULL);
-    if(PJ_SUCCESS != status)
-    {
-        LOG(ERROR)<<"pjsip_endpt_respond error";
-    }
-    return;
-
-}
-
-void SipDirectory::directoryQuery(Json::Value& jsonOut)
-{
-    std::ifstream file("../../conf/catalog.json");
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    string payload = buffer.str();
-
-    if (JsonParser(payload).toJson(jsonOut) == false) {
-        LOG(ERROR) << "JsonParse error";
     }
     return;
 }

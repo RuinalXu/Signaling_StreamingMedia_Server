@@ -65,11 +65,11 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
         return PJ_FALSE;
     }
     threadParam* param = new threadParam();
-    pjsip_rx_data_clone(rdata,0,&param->data);
+    pjsip_rx_data_clone(rdata, 0, &param->data);
     pjsip_msg* msg = rdata->msg_info.msg;
     if (msg->line.req.method.id == PJSIP_OTHER_METHOD) {
         string rootType = "", cmdType = "CmdType", cmdValue;
-        tinyxml2::XMLElement* root = SipTaskBase::parseXmlData(msg,rootType,cmdType,cmdValue);
+        tinyxml2::XMLElement* root = SipTaskBase::parseXmlData(msg, rootType, cmdType, cmdValue);
         LOG(INFO)<<"rootType:"<<rootType;
         LOG(INFO)<<"cmdValue:"<<cmdValue;
         if (rootType == SIP_QUERY) {

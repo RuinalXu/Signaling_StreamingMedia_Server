@@ -9,39 +9,40 @@ SipDirectory::SipDirectory(tinyxml2::XMLElement* root)
 
 SipDirectory::~SipDirectory() {}
 
-pj_status_t SipDirectory::run(pjsip_rx_data *rdata)
-{
+/**
+ *  对下级推动的目录树解析后进行校验,并返回响应状态
+ */
+pj_status_t SipDirectory::run(pjsip_rx_data *rdata) {
     int status_code = SIP_SUCCESS;
-    //解析message-body-xml数据
-    SaveDir(status_code);
-    //响应
+    // 解析Message body中的xml数据
+    saveDir(status_code);
+    // 响应
     pj_status_t status = pjsip_endpt_respond(GBOJ(gSipServer)->GetEndPoint(),NULL,rdata,status_code,NULL,NULL,NULL,NULL);
-    if(PJ_SUCCESS != status)
-    {
+    if(PJ_SUCCESS != status) {
         LOG(ERROR)<<"pjsip_endpt_respond error";
     }
 
     return status;
 }
 
-void SipDirectory::SaveDir(int& status_code)
+void SipDirectory::saveDir(int& status_code)
 {
     tinyxml2::XMLElement* pRootElement = m_pRootElement;
-    if(!pRootElement)
-    {
+    if(!pRootElement) {
         status_code = SIP_BADREQUEST;
         return;
     }
 
-    string strCenterDeviceID,strSumNum,strSn,strDeviceID,strName,strManufacturer,
-    strModel,strOwner,strCivilCode,strParental,strParentID,strSafetyWay,
-    strRegisterWay,strSecrecy,strStatus;
+    string strCenterDeviceID, strSumNum, strSn, strDeviceID, strName, strManufacturer,
+    strModel, strOwner, strCivilCode, strParental, strParentID, strSafetyWay,
+    strRegisterWay, strSecrecy, strStatus;
     tinyxml2::XMLElement* pElement = pRootElement->FirstChildElement("DeviceID");
-    if(pElement && pElement->GetText())
+    if(pElement && pElement->GetText()) {
         strCenterDeviceID = pElement->GetText();
-
-    if(!GlobalCtl::checkIsVaild(strCenterDeviceID))
-    {
+    }
+    
+    // 查询节点ID信息
+    if(!GlobalCtl::checkIsVaild(strCenterDeviceID)) {
         status_code = SIP_BADREQUEST;
         return;
     }
@@ -57,20 +58,16 @@ void SipDirectory::SaveDir(int& status_code)
     }
 
     pElement = pRootElement->FirstChildElement("DeviceList");
-    if(pElement)
-    {
+    if(pElement) {
+        // 解析Item
         tinyxml2::XMLElement* pItem = pElement->FirstChildElement("item");
-        while(pItem)
-        {
+        while(pItem) {
             tinyxml2::XMLElement* pChild = pItem->FirstChildElement("DeviceID");
-            if(pChild && pChild->GetText())
-            {
+            if(pChild && pChild->GetText()) {
                 strDeviceID = pChild->GetText();
-                if(strDeviceID.length() == 20)
-                {
+                if(strDeviceID.length() == 20) {
                     DevTypeCode type = GlobalCtl::getSipDevInfo(strDeviceID);
-                    if(type == Camera_Code || type == Ipc_Code)
-                    {
+                    if(type == Camera_Code || type == Ipc_Code) {
                         GlobalCtl::gRcvIpc = true;
                         LOG(INFO) << "get ipc device";
                     }
@@ -125,7 +122,6 @@ void SipDirectory::SaveDir(int& status_code)
             }
             pItem = pItem->NextSiblingElement();
         }
-
     }
 }
 

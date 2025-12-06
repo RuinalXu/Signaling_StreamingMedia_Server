@@ -15,6 +15,9 @@ std::string SipTaskBase::parseFromId(pjsip_msg* msg) {
     return fromId;
 }
 
+/**
+ *  XML数据解析
+ */
 tinyxml2::XMLElement* SipTaskBase::parseXmlData(pjsip_msg* msg, std::string& rootType, const std::string xmlkey, std::string& xmlvalue) {
     tinyxml2::XMLDocument* pxmlDoc = NULL;
     pxmlDoc = new tinyxml2::XMLDocument();

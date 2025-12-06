@@ -3,7 +3,7 @@
 
 #include <pjlib.h>
 #include <pjsip_ua.h>
-#include "sip/SipTaskBase.h"
+#include "SipTaskBase.h"
 #include "tinyxml2.h"
 #include "log/LogManager.h"
 
@@ -17,7 +17,7 @@ public:
         LOG(INFO) << "~SipTaskBase";
     }
     /**
-     *  上级处理不同sip请求,如:REGISTER/INVITE等
+     *  下级处理不同sip请求,如:REGISTER/INVITE等
      */
     virtual void run(pjsip_rx_data* rdata) = 0;
 
