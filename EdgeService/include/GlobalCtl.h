@@ -84,6 +84,7 @@ public:
     static void free_global_mutex() {
         pthread_mutex_unlock(&globalLock);
     }
+    static DevTypeCode getSipDevInfo(string id);
 private:
     static GlobalCtl* m_pInstance;
     static SUPDOMAININFOLIST supDomainInfoList;

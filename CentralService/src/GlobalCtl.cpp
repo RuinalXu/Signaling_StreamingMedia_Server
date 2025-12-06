@@ -1,9 +1,17 @@
 #include "GlobalCtl.h"
+#include <sip/SipDef.h>
 
 GlobalCtl* GlobalCtl::m_pInstance = NULL;
 GlobalCtl::SUBDOMAININFOLIST GlobalCtl::subDomainInfoList;
 pthread_mutex_t GlobalCtl::globalLock = PTHREAD_MUTEX_INITIALIZER;
 bool GlobalCtl::gStopPoll = false;
+
+/**
+ *  是否获取到IPC设备
+ *  上级在解析下级推送的目录树后,从DeviceID中解析中相应的设备(定义在枚举中)
+ *  案例里面是IPC网络摄像头,如果成功解析就将标识位设置为true.
+ */
+bool GlobalCtl::gRcvIpc = false;
 
 GlobalCtl* GlobalCtl::instance() {
     if (!m_pInstance) {
@@ -132,4 +140,34 @@ bool GlobalCtl::getAuth(string id) {
         return it->auth;
     }
     return false;
+}
+
+bool GlobalCtl::checkIsVaild(string id) {
+    AutoMutexLock lck(&globalLock);
+    SUBDOMAININFOLIST::iterator it;
+    it = std::find(subDomainInfoList.begin(), subDomainInfoList.end(), id);
+    if (it != subDomainInfoList.end() && it->registered) {
+        return true;
+    }
+    return false;
+}
+
+DevTypeCode GlobalCtl::getSipDevInfo(string id) {
+    DevTypeCode code_type = Error_code;
+    string tmp = id.substr(10, 3);
+    // atio()标准库函数: 字符串转int值
+    int type = atoi(tmp.c_str());
+
+    switch(type) {
+        case Camera_Code:
+            code_type = Camera_Code;
+            break;
+        case Ipc_Code:
+            code_type = Ipc_Code;
+            break;   
+        default:
+            code_type = Error_code;
+            break;
+    }
+    return code_type;
 }

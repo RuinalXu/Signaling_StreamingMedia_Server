@@ -6,7 +6,6 @@
 #include "SipRegister.h"
 #include "SipHeartBeat.h"
 
-
 void* func(void* argc) {
 	pthread_t id = pthread_self();
 	LOG(INFO) << "current thread id:"<<id;

@@ -1,7 +1,10 @@
 #include <sip/SipDef.h>
-#include <sip/SipTaskBase.h>
+#include "SipTaskBase.h"
 #include "SipCore.h"
 #include "GlobalCtl.h"
+#include "SipDirectory.h"
+#include <sip/SipDef.h>
+#include "SipGbPlay.h"
 
 SipCore::SipCore()
 :m_endpt(NULL) {
@@ -9,6 +12,7 @@ SipCore::SipCore()
 }
 
 SipCore::~SipCore() {
+    pjmedia_endpt_destroy(m_mediaEndpt);
     pjsip_endpt_destroy(m_endpt);
     pj_caching_pool_destroy(&m_cachingPool);
     pj_shutdown();
@@ -62,11 +66,11 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
         return PJ_FALSE;
     }
     threadParam* param = new threadParam();
-    pjsip_rx_data_clone(rdata,0,&param->data);
+    pjsip_rx_data_clone(rdata, 0, &param->data);
     pjsip_msg* msg = rdata->msg_info.msg;
     if (msg->line.req.method.id == PJSIP_OTHER_METHOD) {
         string rootType = "", cmdType = "CmdType", cmdValue;
-        tinyxml2::XMLElement* root = SipTaskBase::parseXmlData(msg,rootType,cmdType,cmdValue);
+        tinyxml2::XMLElement* root = SipTaskBase::parseXmlData(msg, rootType, cmdType, cmdValue);
         LOG(INFO)<<"rootType:"<<rootType;
         LOG(INFO)<<"cmdValue:"<<cmdValue;
         if (rootType == SIP_QUERY) {
@@ -74,7 +78,7 @@ pj_bool_t onRxRequest(pjsip_rx_data *rdata) {
                 param->base = new SipDirectory(root);
             }
             else if (cmdValue == SIP_RECORDINFO) {
-                param->base = new SipRecordList();
+                // param->base = new SipRecordList();
             }
             
         }
@@ -187,19 +191,19 @@ bool SipCore::InitSip(int sipPort) {
             LOG(ERROR) << "100rel module init faild,code:" << status;
             break;
         }
-
+*/
         // 
         pjsip_inv_callback inv_cb;
         pj_bzero(&inv_cb,sizeof(inv_cb));
-        inv_cb.on_state_changed = &SipGbPlay::OnStateChanged;
-        inv_cb.on_new_session = &SipGbPlay::OnNewSession;
-        inv_cb.on_media_update = &SipGbPlay::OnMediaUpdate;
+        inv_cb.on_state_changed = &SipGbPlay::onStateChanged;
+        inv_cb.on_new_session = &SipGbPlay::onNewSession;
+        inv_cb.on_media_update = &SipGbPlay::onMediaUpdate;
         status = pjsip_inv_usage_init(m_endpt, &inv_cb);
         if (PJ_SUCCESS != status) {
             LOG(ERROR) << "register invite module faild,code:" << status;
             break;
         }
-*/
+
         // 给endpoint分配内存池后,endpoint才能对其他模块进行内存分配管理
         m_pool = pjsip_endpt_create_pool(m_endpt, NULL, SIP_ALLOC_POOL_1M, SIP_ALLOC_POOL_1M);
         if (NULL == m_pool) {

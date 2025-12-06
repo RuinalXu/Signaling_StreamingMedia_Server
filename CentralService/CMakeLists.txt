@@ -20,7 +20,12 @@ set(PJSIP_ROOT "../third_party/pjproject/pjsip")
 set(PJLIB_UTIL_ROOT "../third_party/pjproject/pjlib-util")
 set(PJMEDIA_ROOT "../third_party/pjproject/pjmedia")
 set(PJNATH_ROOT "../third_party/pjproject/pjnath")
-
+# 设置jthread相关路径
+set(JTHREAD_ROOT "../third_party/jthread")
+# 设置jrtplib相关路径
+set(JRTPLIB_ROOT "../third_party/jrtplib")
+# 设置media_server相关路径
+set(MEDIA_SERVER_ROOT "../third_party/media_server")
 
 # 添加项目头文件
 target_include_directories(${EXE_NAME} PRIVATE ./include)
@@ -30,6 +35,12 @@ target_include_directories(${EXE_NAME} PRIVATE ${PJSIP_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJLIB_UTIL_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJMEDIA_ROOT}/include)
 target_include_directories(${EXE_NAME} PRIVATE ${PJNATH_ROOT}/include)
+# 添加jthread第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${JTHREAD_ROOT}/src)
+# 添加jrtplib第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${JRTPLIB_ROOT}/src)
+# 添加media_server的mpeg第三方库头文件
+target_include_directories(${EXE_NAME} PRIVATE ${MEDIA_SERVER_ROOT}/libmpeg/include)
 
 # 编辑时定义宏,指定字节序
 target_compile_definitions(${EXE_NAME} PRIVATE PJ_IS_LITTLE_ENDIAN=1)
@@ -56,6 +67,12 @@ find_library(PJMEDIA_SDP pjsdp-aarch64-unknown-linux-gnu PATHS ${PJMEDIA_ROOT}/l
 find_library(PJMEDIA_CODEC pjmedia-codec-aarch64-unknown-linux-gnu PATHS ${PJMEDIA_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 # pjnath相关链接库
 find_library(PJNATH_LIB pjnath-aarch64-unknown-linux-gnu PATHS ${PJNATH_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
+# jthread相关链接库
+find_library(JTHREAD_LIB jthread PATHS ${JTHREAD_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
+# jrtplib相关链接库
+find_library(JRTPLIB_LIB jrtp PATHS ${JRTPLIB_ROOT}/build/src NO_DEFAULT_PATH REQUIRED)
+# media_server相关链接库
+find_library(MEDIA_SERVER_MPEG_LIB mpeg PATHS ${MEDIA_SERVER_ROOT}/lib NO_DEFAULT_PATH REQUIRED)
 
 find_package(fmt CONFIG REQUIRED)
 find_package(glog CONFIG REQUIRED)
@@ -65,6 +82,22 @@ find_package(tinyxml2 CONFIG REQUIRED)
 find_package(Libevent CONFIG REQUIRED)
 find_package(libSRTP CONFIG REQUIRED)
 
+# 使用pck-config对ffmpeg库进行链接
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(FFMPEG REQUIRED
+    libavcodec
+    libavdevice
+    libavfilter
+    libavformat
+    libavutil
+    libswresample
+    libswscale
+)
+target_include_directories(${EXE_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
+target_link_directories(${EXE_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
+target_link_libraries(${EXE_NAME} PRIVATE ${FFMPEG_LIBRARIES})
+
+# 链接第三方库
 target_link_libraries(${EXE_NAME} PRIVATE
     fmt::fmt
     glog::glog
@@ -97,6 +130,15 @@ target_link_libraries(${EXE_NAME} PRIVATE
     ${PJLIB_LIB}
 
     libSRTP::srtp2
+)
+
+target_link_libraries(${EXE_NAME} PRIVATE
+    ${JRTPLIB_LIB}
+    ${JTHREAD_LIB}
+)
+
+target_link_libraries(${EXE_NAME} PRIVATE
+    ${MEDIA_SERVER_MPEG_LIB}
 )
 
 # 引入自定义静态库

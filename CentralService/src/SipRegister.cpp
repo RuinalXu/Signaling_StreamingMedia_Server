@@ -2,8 +2,8 @@
 #include "GlobalCtl.h"
 #include <time.h>
 #include <sys/sysinfo.h>
-#include <sip/SipStatusCode.h>
-#include <sip/SipTaskBase.h>
+#include <sip/SipDef.h>
+#include "SipTaskBase.h"
 
 static pj_status_t auth_cred_callback(pj_pool_t *pool,
 					    const pj_str_t *realm,

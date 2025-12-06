@@ -1,4 +1,4 @@
-#include "sip/SipTaskBase.h"
+#include "SipTaskBase.h"
 
 std::string SipTaskBase::parseFromId(pjsip_msg* msg) {
     pjsip_from_hdr* from = (pjsip_from_hdr*)pjsip_msg_find_hdr(msg, PJSIP_H_FROM, NULL);

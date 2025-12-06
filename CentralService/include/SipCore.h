@@ -7,7 +7,7 @@
 #include <pjsip/sip_auth.h>
 #include <pjlib.h>
 #include <pjsip_ua.h>
-#include <sip/SipTaskBase.h>
+#include "SipTaskBase.h"
 
 typedef struct _threadParam {
     _threadParam() {
@@ -42,6 +42,7 @@ public:
     bool InitSip(int sipPort);
     pj_status_t init_transport_layer(int sipPort);
     pjsip_endpoint* GetEndPoint() { return m_endpt; }
+    pj_pool_t* GetPool() { return m_pool; }
 
     /**
      *  多线程处理下级SIP不同请求的回调函数
