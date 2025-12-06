@@ -2,6 +2,7 @@
 
 最终实现目的：按照GB28181手册，从零开发并完成上下级信令服务器和媒体服务器。
 
+[飞书云文档开发博客](https://icnob5v18inr.feishu.cn/wiki/UWNzwl1IiiiFKakq2Aeckw1pnGb?from=from_copylink)
 ---
 
 ## 开发环境：
